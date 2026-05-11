@@ -151,9 +151,19 @@ int main(int argc, char* argv[]) {
 	}
 
 	std::string dataset = argv[1];
-    std::string capacityFile = "./KnapsackTestData/p0" + dataset + "_c.txt";
-    std::string valuesFile = "./KnapsackTestData/p0" + dataset + "_v.txt";
-    std::string weightsFile = "./KnapsackTestData/p0" + dataset + "_w.txt";
+    std::string capacityFile;
+    std::string valuesFile;
+    std::string weightsFile ;
+
+    if (dataset != "10") {
+        capacityFile = "./KnapsackTestData/p0" + dataset + "_c.txt";
+        valuesFile = "./KnapsackTestData/p0" + dataset + "_v.txt";
+        weightsFile = "./KnapsackTestData/p0" + dataset + "_w.txt";
+    } else {
+        capacityFile = "./KnapsackTestData/p" + dataset + "_c.txt";
+        valuesFile = "./KnapsackTestData/p" + dataset + "_v.txt";
+        weightsFile = "./KnapsackTestData/p" + dataset + "_w.txt";
+    }
 
     std::vector<int> capacity;    
     std::vector<int> values;
