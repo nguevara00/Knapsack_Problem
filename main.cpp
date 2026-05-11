@@ -69,9 +69,9 @@
 // Display the best value, subset yielding the best value, and the total number of basic operations (includes operations for building the heap, finding the best value, and the corresponding subset). 
 // Note, items begin with index 1 and so the set of all items = {1, 2, 3, ...., n}
 
-// TASK 3 : Comparison for report
-// Task 1a vs Task 1b:
-/*
+/* TASK 3 : Comparison for report
+
+Task 1a vs Task 1b:
     Produce a graph that compares the total number of basic operations taken by the traditional and "memory-function" approaches (1a and 1b) for all the input cases. Note: the x-axis is case-id and the y-axis is the number of operations.
         You may (and are encouraged) to use different input files that can help in supporting your argument.
     Comment on which approach is more efficient and why?
@@ -98,6 +98,28 @@ Task 1 vs Task 2:
     Using a suitable algorithm from Task 1 and Task 2, compare and contrast the time taken by these two algorithms and the optimal value they generate.
         You may (and are encouraged) to use different input files that can help in supporting your argument.
     Which algorithm would you pick, given what you have learned in this project? Why?
+
+Task Tracking -
+
+	PROGRAMMING -
+		1A - 1/3
+		1B - 0/3
+		1C - 0/4
+		2A - 0/3
+		2B - 0/3
+			
+	REPORT -
+		Graph 1A vs 1B - 0/1
+		Analysis 1A vs 1B - 0/1
+	
+		Graph 1C - 0/1
+		Analysis 1C - 0/1
+
+		Analysis 1B vs 1C - 0/1
+		Graph 2A vs 2B - 0/1
+		Analysis 2A vs 2B - 0/1
+
+		Analysis 1 vs 2 - 0/1			
 */
 
 #include <fstream>
