@@ -1,11 +1,10 @@
-// Knapsack Project Main
-// Nick Guevara
+// Nick Guevara William Dappen
 // CS 415 Gill
 // Project 4 - Knapsack
 // 5-9-2026
 
 
-// AI is specifically instructed not to provide any C++ code.
+// AI is specifically instructed not to provide any C++ code
 
 // permissible AI: 
 // forguidance or refresher on algorithms. pseudocode only, for implementation of algorithms and data structure, and hash functions. 
@@ -109,6 +108,7 @@ Task 1 vs Task 2:
 
 using matrix = std::vector<std::vector<int>>;
 
+//reads in a file and stores the contents in a vector
 bool fileToVector(const std::string& filename, std::vector<int>& values){
     std::ifstream inputFile(filename);
     if (!inputFile) {
@@ -126,6 +126,7 @@ bool fileToVector(const std::string& filename, std::vector<int>& values){
     return true;
 }
 
+//traditional dynamic programming, fills the solution matrix for the knapsack problem
 void fillTheTable(const std::vector<int>& v, const std::vector<int>& w, int W, matrix& solutionGrid){
     for (size_t i = 0; i <= v.size(); i++){
         for (int j = 0; j <= W; j++){
@@ -142,11 +143,10 @@ void fillTheTable(const std::vector<int>& v, const std::vector<int>& w, int W, m
     }
 }
 
-
 int main(int argc, char* argv[]) {
 	
     if (argc != 2) {
-	    std::cerr << "Incorrect input. Correct format: ./<exectuable.out> <inputtext.txt>" << std::endl;
+	    std::cerr << "Incorrect input. Correct format: ./<exectuable.out> <filenumber>" << std::endl;
 	    return 1;
 	}
 
@@ -159,13 +159,15 @@ int main(int argc, char* argv[]) {
     std::vector<int> values;
     std::vector<int> weights;
 
-    if (!fileToVector(capacityFile, capacity)) return 1;
-    if (!fileToVector(valuesFile, values)) return 1;
-    if (!fileToVector(weightsFile, weights)) return 1;
-
-    if (capacity.empty()) {
-        std::cerr << "capacity file is empty." << std::endl;
-    }
+    if (!fileToVector(capacityFile, capacity)) {
+		return 1;
+	}
+    if (!fileToVector(valuesFile, values)) { 
+		return 1;
+	}
+    if (!fileToVector(weightsFile, weights)) { 
+		return 1;
+	}
 
     if (values.size() != weights.size()){
         std::cerr << "Weights and Values files are different sizes." << std::endl;
