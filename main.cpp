@@ -130,6 +130,11 @@ Task Tracking -
 
 using matrix = std::vector<std::vector<int>>;
 
+struct Result {
+    int basicOps;
+    std::vector<int> optimalSet;
+};
+
 //reads in a file and stores the contents in a vector
 bool fileToVector(const std::string& filename, std::vector<int>& values){
     std::ifstream inputFile(filename);
@@ -148,13 +153,39 @@ bool fileToVector(const std::string& filename, std::vector<int>& values){
     return true;
 }
 
+std::vector<int> optimalSetBuilder(std::vector<int>& set, int i, int j, const std::vector<int>& v, const std::vector<int>& w, const matrix& solutionGrid, int& opCount){
+    // what is the basic operation??
+    // we say its comparison and each call compares a pair of cells once
+    opCount++;
+    if (i == 0 || j == 0){
+        return set;
+    }
+    else if (solutionGrid[i][j] > solutionGrid[i-1][j]) {
+        set.push_back(v[i-1]);
+        optimalSetBuilder(set, i-1, j-w[i-1], v, w, solutionGrid, opCount);
+    }
+    else {
+        optimalSetBuilder(set,i-1,j,v,w,solutionGrid, opCount);
+    }
+    return set;
+}
+
 //traditional dynamic programming, fills the solution matrix for the knapsack problem
-void fillTheTable(const std::vector<int>& v, const std::vector<int>& w, int W, matrix& solutionGrid){
+Result traditionalDynamic(const std::vector<int>& v, const std::vector<int>& w, int W, matrix& solutionGrid){
+    int opCount = 0;
+    std::vector<int> set;
+    Result result;
+    
+    // fill the cells and count the basic operations.
+    // define 1 basic operation as filling a cell, since each branch of the loop does this in constant time. 
     for (size_t i = 0; i <= v.size(); i++){
         for (int j = 0; j <= W; j++){
+            opCount++;
             if (i == 0 || j == 0){
                 solutionGrid[i][j] = 0;
             }
+
+            // in this branch, there are 1 comparison, then an assignment, a max, and addition, and a comparison.
             else if (j - w[i-1] >= 0) {
                 solutionGrid[i][j] = std::max(solutionGrid[i-1][j], v[i-1] + solutionGrid[i-1][j-w[i-1]]);
             }
@@ -163,7 +194,15 @@ void fillTheTable(const std::vector<int>& v, const std::vector<int>& w, int W, m
             }   
         }
     }
+    
+    //backtrack optimalset
+    result.optimalSet = optimalSetBuilder(set, v.size(), W, v, w, solutionGrid, opCount); 
+    result.basicOps = opCount;
+    return result;
 }
+
+
+
 
 int main(int argc, char* argv[]) {
 	
@@ -210,14 +249,24 @@ int main(int argc, char* argv[]) {
 
     //traditional dynamic programming
     matrix solutionGrid(n + 1, std::vector<int>(W + 1, 0));
-    fillTheTable(values, weights, W, solutionGrid);
+    Result traditionalResult;
+    traditionalResult = traditionalDynamic(values, weights, W, solutionGrid);
 
     std::cout << "File containing the capacity, weights, and values are: " << capacityFile << ", " << weightsFile << ", " << valuesFile << std::endl << std::endl;
     std::cout << "Knapsack capacity = " << W << ". Total number of items = " << n << std::endl << std::endl;
     
     std::cout << "(1a) Traditional Dynamic Programming Optimal value: " << solutionGrid[values.size()][W] << std::endl;
-    std::cout << "(1a) Traditional Dynamic Programming Optimal subset: not yet implemented" << std::endl;
-    std::cout << "(1a) Traditional Dynamic Programming Total Basic Ops: not yet implemented" << std::endl << std::endl;
+    std::cout << "(1a) Traditional Dynamic Programming Optimal subset: {";
+    for (size_t i = 0; i < traditionalResult.optimalSet.size(); i++){
+        std::cout << traditionalResult.optimalSet[i];
+        if (i != traditionalResult.optimalSet.size() - 1){
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
+    
+    std::cout << "(1a) Traditional Dynamic Programming Total Basic Ops: " << traditionalResult.basicOps << std::endl << std::endl;
+
 
     std::cout << "(1b) Memory-function Dynamic Programming Optimal value: not yet implemented" << std::endl;
     std::cout << "(1b) Memory-function Dynamic Programming Optimal subset: not yet implemented" << std::endl;
