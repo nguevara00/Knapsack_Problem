@@ -161,7 +161,7 @@ std::vector<int> optimalSetBuilder(std::vector<int>& set, int i, int j, const st
         return set;
     }
     else if (solutionGrid[i][j] > solutionGrid[i-1][j]) {
-        set.push_back(v[i-1]);
+        set.push_back(i);
         optimalSetBuilder(set, i-1, j-w[i-1], v, w, solutionGrid, opCount);
     }
     else {
