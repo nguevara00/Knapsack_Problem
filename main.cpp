@@ -102,7 +102,7 @@ Task 1 vs Task 2:
 Task Tracking -
 
 	PROGRAMMING -
-		1A - 1/3
+		1A - 3/3
 		1B - 0/3
 		1C - 0/4
 		2A - 0/3
@@ -167,6 +167,7 @@ std::vector<int> optimalSetBuilder(std::vector<int>& set, int i, int j, const st
     else {
         optimalSetBuilder(set,i-1,j,v,w,solutionGrid, opCount);
     }
+    std::sort(set.begin(), set.end());
     return set;
 }
 
@@ -200,9 +201,6 @@ Result traditionalDynamic(const std::vector<int>& v, const std::vector<int>& w, 
     result.basicOps = opCount;
     return result;
 }
-
-
-
 
 int main(int argc, char* argv[]) {
 	
