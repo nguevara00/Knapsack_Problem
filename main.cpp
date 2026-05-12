@@ -135,7 +135,7 @@ struct Result {
     std::vector<int> optimalSet;
 };
 
-//reads in a file and stores the contents in a vector
+//reads in the file and stores the contents in the vector
 bool fileToVector(const std::string& filename, std::vector<int>& values){
     std::ifstream inputFile(filename);
     if (!inputFile) {
@@ -153,6 +153,7 @@ bool fileToVector(const std::string& filename, std::vector<int>& values){
     return true;
 }
 
+//recursive helper for traditionalDynamic, builds the set of items that were chosen in the optimal solution of the knapsack problem
 std::vector<int> optimalSetBuilder(std::vector<int>& set, int i, int j, const std::vector<int>& v, const std::vector<int>& w, const matrix& solutionGrid, int& opCount){
     // what is the basic operation??
     // we say its comparison and each call compares a pair of cells once
@@ -186,7 +187,6 @@ Result traditionalDynamic(const std::vector<int>& v, const std::vector<int>& w, 
                 solutionGrid[i][j] = 0;
             }
 
-            // in this branch, there are 1 comparison, then an assignment, a max, and addition, and a comparison.
             else if (j - w[i-1] >= 0) {
                 solutionGrid[i][j] = std::max(solutionGrid[i-1][j], v[i-1] + solutionGrid[i-1][j-w[i-1]]);
             }
@@ -196,11 +196,14 @@ Result traditionalDynamic(const std::vector<int>& v, const std::vector<int>& w, 
         }
     }
     
-    //backtrack optimalset
     result.optimalSet = optimalSetBuilder(set, v.size(), W, v, w, solutionGrid, opCount); 
     result.basicOps = opCount;
     return result;
 }
+
+
+
+
 
 int main(int argc, char* argv[]) {
 	
@@ -245,11 +248,25 @@ int main(int argc, char* argv[]) {
     int W = capacity[0];
     int n = values.size();
 
-    //traditional dynamic programming
+    // traditional dynamic programming
     matrix solutionGrid(n + 1, std::vector<int>(W + 1, 0));
-    Result traditionalResult;
-    traditionalResult = traditionalDynamic(values, weights, W, solutionGrid);
+    Result traditionalResult = traditionalDynamic(values, weights, W, solutionGrid);
 
+    // memory function dynamic programming
+    //      not yet implemented
+
+    // space efficient dynamic programming
+    //      not yet implemented
+
+    // greedy approach
+    //      not yet implemented
+    
+    // heap based greedy approach
+    //      not yet implemented
+
+
+
+    //output section
     std::cout << "File containing the capacity, weights, and values are: " << capacityFile << ", " << weightsFile << ", " << valuesFile << std::endl << std::endl;
     std::cout << "Knapsack capacity = " << W << ". Total number of items = " << n << std::endl << std::endl;
     
