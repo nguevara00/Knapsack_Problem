@@ -133,6 +133,8 @@ using matrix = std::vector<std::vector<int>>;
 struct Result {
     int basicOps;
     std::vector<int> optimalSet;
+
+
 };
 
 //reads in the file and stores the contents in the vector
@@ -201,7 +203,53 @@ Result traditionalDynamic(const std::vector<int>& v, const std::vector<int>& w, 
     return result;
 }
 
+//Built off of the traditional dynamic programming approach, fills the solution matrix for the knapsack problem from both ends
+// assume solutionGrid is initialized to -1 for all cells, so that we can check if a cell has been filled or not
+// Recursive function, therefore memoryFunction() will be a shell around a recursive helper function that fills the solution grid
+int memoryHelper(const std::vector<int>& v, const std::vector<int>& w, int i, int j, matrix& solutionGrid, int& opCount);
+Result memoryFunction(const std::vector<int>& v, const std::vector<int>& w, int W, matrix& solutionGrid){
+    int opCount = 0;
+    int n = static_cast<int>(v.size()-1);
 
+    memoryHelper(v, w, n, W, solutionGrid, opCount);
+
+    std::vector<int> set;
+    Result result;
+
+    result.optimalSet = optimalSetBuilder(set, n, W, v, w, solutionGrid, opCount);
+
+    result.basicOps = opCount;
+
+    return result;
+}
+
+int memoryHelper(const std::vector<int>& v, const std::vector<int>& w, int i, int j, matrix& solutionGrid, int& opCount){
+    // added base case, first rows and columns must be zero
+    if (i == 0 || j == 0) {
+        if (solutionGrid[i][j] == -1) {
+            solutionGrid[i][j] = 0;
+            opCount++;
+        }
+        return solutionGrid[i][j];
+    }
+
+    if (solutionGrid[i][j] != -1) {
+        return solutionGrid[i][j];
+    }
+
+    opCount++;
+
+    if (j < w[i - 1]) {
+        solutionGrid[i][j] = memoryHelper(v, w, i - 1, j, solutionGrid, opCount);
+    } else {
+        int exclude = memoryHelper(v, w, i - 1, j, solutionGrid, opCount);
+        int include = v[i - 1] + memoryHelper(v, w, i - 1, j - w[i - 1], solutionGrid, opCount);
+
+        solutionGrid[i][j] = std::max(exclude, include);
+    }
+
+    return solutionGrid[i][j];
+}
 
 
 
@@ -218,13 +266,13 @@ int main(int argc, char* argv[]) {
     std::string weightsFile ;
 
     if (dataset != "10") {
-        capacityFile = "./KnapsackTestData/p0" + dataset + "_c.txt";
-        valuesFile = "./KnapsackTestData/p0" + dataset + "_v.txt";
-        weightsFile = "./KnapsackTestData/p0" + dataset + "_w.txt";
+        capacityFile = "../KnapsackTestData/p0" + dataset + "_c.txt";
+        valuesFile = "../KnapsackTestData/p0" + dataset + "_v.txt";
+        weightsFile = "../KnapsackTestData/p0" + dataset + "_w.txt";
     } else {
-        capacityFile = "./KnapsackTestData/p" + dataset + "_c.txt";
-        valuesFile = "./KnapsackTestData/p" + dataset + "_v.txt";
-        weightsFile = "./KnapsackTestData/p" + dataset + "_w.txt";
+        capacityFile = "../KnapsackTestData/p" + dataset + "_c.txt";
+        valuesFile = "../KnapsackTestData/p" + dataset + "_v.txt";
+        weightsFile = "../KnapsackTestData/p" + dataset + "_w.txt";
     }
 
     std::vector<int> capacity;    
@@ -249,11 +297,14 @@ int main(int argc, char* argv[]) {
     int n = values.size();
 
     // traditional dynamic programming
-    matrix solutionGrid(n + 1, std::vector<int>(W + 1, 0));
-    Result traditionalResult = traditionalDynamic(values, weights, W, solutionGrid);
+    matrix solutionGridTrad(n + 1, std::vector<int>(W + 1, 0));
+    Result traditionalResult = traditionalDynamic(values, weights, W, solutionGridTrad);
 
     // memory function dynamic programming
-    //      not yet implemented
+    //      set these values to -1 to indicate that they have not been filled yet,
+    //      since the memory function approach does not fill all cells of the solution grid
+    matrix solutionGridMem(n + 1, std::vector<int>(W + 1, -1));
+    Result memoryResult = memoryFunction(values, weights, W, solutionGridMem);
 
     // space efficient dynamic programming
     //      not yet implemented
@@ -270,7 +321,7 @@ int main(int argc, char* argv[]) {
     std::cout << "File containing the capacity, weights, and values are: " << capacityFile << ", " << weightsFile << ", " << valuesFile << std::endl << std::endl;
     std::cout << "Knapsack capacity = " << W << ". Total number of items = " << n << std::endl << std::endl;
     
-    std::cout << "(1a) Traditional Dynamic Programming Optimal value: " << solutionGrid[values.size()][W] << std::endl;
+    std::cout << "(1a) Traditional Dynamic Programming Optimal value: " << solutionGridTrad[values.size()][W] << std::endl;
     std::cout << "(1a) Traditional Dynamic Programming Optimal subset: {";
     for (size_t i = 0; i < traditionalResult.optimalSet.size(); i++){
         std::cout << traditionalResult.optimalSet[i];
@@ -283,9 +334,17 @@ int main(int argc, char* argv[]) {
     std::cout << "(1a) Traditional Dynamic Programming Total Basic Ops: " << traditionalResult.basicOps << std::endl << std::endl;
 
 
-    std::cout << "(1b) Memory-function Dynamic Programming Optimal value: not yet implemented" << std::endl;
-    std::cout << "(1b) Memory-function Dynamic Programming Optimal subset: not yet implemented" << std::endl;
-    std::cout << "(1b) Memory-function Dynamic Programming Total Basic Ops: not yet implemented" << std::endl << std::endl;
+    std::cout << "(1b) Memory-function Dynamic Programming Optimal value: " << solutionGridMem[values.size()][W] << std::endl;
+    std::cout << "(1b) Memory-function Dynamic Programming Optimal subset: {";
+    for (size_t i = 0; i < memoryResult.optimalSet.size(); i++){
+        std::cout << memoryResult.optimalSet[i];
+        if (i != memoryResult.optimalSet.size() - 1){
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
+
+    std::cout << "(1b) Memory-function Dynamic Programming Total Basic Ops: " << memoryResult.basicOps << std::endl << std::endl;
 
     std::cout << "(1c) Space-Efficient Dynamic Programming Optimal value: not yet implemented" << std::endl;
     std::cout << "(1c) Space-Efficient Dynamic Programming Optimal subset: not yet implemented" << std::endl;
