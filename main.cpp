@@ -235,10 +235,12 @@ void merge(std::vector<std::pair<double, int>>& arr, int left, int mid, int righ
     // copy & merge data to temp arrays
     for (int i = 0; i < n1; i++) {
         L[i] = arr[left + i];
+        opCount++;
     }
 
     for (int j = 0; j < n2; j++) {
         R[j] = arr[mid + 1 + j];
+        opCount++;
     }
 
     int i = 0;
@@ -261,12 +263,14 @@ void merge(std::vector<std::pair<double, int>>& arr, int left, int mid, int righ
     }
 
     while (i < n1) {
+        opCount++;
         arr[k] = L[i];
         i++;
         k++;
     } // copy the remaining elements of R, if there are any
 
     while (j < n2) {
+        opCount++;
         arr[k] = R[j];
         j++;
         k++;
@@ -285,13 +289,13 @@ void mergeSort(std::vector<std::pair<double, int>>& arr, int left, int right, in
 
 Result greedyFunction(const std::vector<int>& v, const std::vector<int>& w, int capacity) {
     std::vector<std::pair<double, int>> ratioList(v.size());
+    int opCount = 0;
 
     for (std::size_t i = 0; i < v.size(); i++) {
+        opCount++;
         ratioList[i].first = static_cast<double>(v[i]) / w[i];
         ratioList[i].second = static_cast<int>(i);
     }
-
-    int opCount = 0;
 
     if (!ratioList.empty()) {
         mergeSort(ratioList, 0, static_cast<int>(ratioList.size()) - 1, opCount);
@@ -331,17 +335,17 @@ Result greedyFunction(const std::vector<int>& v, const std::vector<int>& w, int 
 
 Result heapFunction(const std::vector<int>& v, const std::vector<int>& w, int capacity) {
     std::vector<std::pair<double, int>> ratioList(v.size());
+    int opCount = 0;
 
     for (std::size_t i = 0; i < v.size(); i++) {
+        opCount++;
         ratioList[i].first = static_cast<double>(v[i]) / w[i];
         ratioList[i].second = static_cast<int>(i);
     }
-
-    int opCount = 0;
     heap h(ratioList);
 
     if (!ratioList.empty()) {
-        opCount = h.getOpCount();
+        opCount += h.getOpCount();
     } else {
         Result out;
         out.basicOps = opCount;
