@@ -24,7 +24,7 @@ public:
     HashTable(const int& k, const int& W);
 
     //inserts cell(i,j) with its value into the hash table
-    void insert(int i, int j, int valueint& opCount);
+    void insert(int i, int j, int value, int& opCount);
 
     //returns the value if it is found, or -1 if it is not found
     int lookup(int i, int j, int& opCount);
