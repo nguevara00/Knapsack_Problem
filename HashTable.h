@@ -17,7 +17,7 @@ private:
     int W;
 
     //returns the hash for i,j to choose bucket
-    int hash(int i, int j);
+    int hash(int i, int j, int& opCount);
 
 public:
     //builds a hashtable with k buckets
