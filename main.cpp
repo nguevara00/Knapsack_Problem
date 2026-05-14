@@ -28,7 +28,7 @@ Task Tracking -
 */
 
 #include <fstream>
-#include <algorithm>
+#include <algorithm> //std::max
 #include <vector>
 #include <iostream>
 #include <string>
@@ -36,7 +36,7 @@ Task Tracking -
 #include "HashTable.h"
 
 using matrix = std::vector<std::vector<int>>;
-const double TABLE_MULTIPLIER = 1.5; // ask me about this 
+const int ALPHA = 4; // ask me about this 
 
 struct Result {
     int basicOps;
@@ -62,10 +62,9 @@ bool fileToVector(const std::string& filename, std::vector<int>& values){
     return true;
 }
 
-//recursive helper for traditionalDynamic, builds the set of items that were chosen in the optimal solution of the knapsack problem
+//recursive helper for dynamic programming approaches, builds the set of items that were chosen in the optimal solution of the knapsack problem
 std::stack<int> optimalSetBuilder(std::stack<int>& set, int i, int j, const std::vector<int>& v, const std::vector<int>& w, const matrix& solutionGrid, int& opCount){
-    // what is the basic operation??
-    // we say its comparison and each call compares a pair of cells once
+    //the basic operation is comparison, each call compares one pair of cells
     opCount++;
     if (i == 0 || j == 0){
         return set;
@@ -80,9 +79,9 @@ std::stack<int> optimalSetBuilder(std::stack<int>& set, int i, int j, const std:
     return set;
 }
 
+//recursive helper for space-efficient approach, builds the set of items that were chosen in the optimal solution of the knapsack problem
 std::stack<int> optimalSetBuilderHash(std::stack<int>& set, int i, int j, const std::vector<int>& v, const std::vector<int>& w, HashTable& hashTable, int& opCount){
-    // what is the basic operation??
-    // we say its comparison and each call compares a pair of cells once
+    //the basic operation is comparison, each call compares one pair of cells
     opCount++;
     if (i == 0 || j == 0){
         return set;
@@ -269,7 +268,7 @@ int main(int argc, char* argv[]) {
     }
 
     int W = capacity[0];
-
+    int n = static_cast<int>(values.size());
     // traditional dynamic programming
     Result traditionalDynamicResult = traditionalDynamic(values, weights, W);
 
@@ -277,7 +276,7 @@ int main(int argc, char* argv[]) {
     Result memoryFunctionResult = memoryFunction(values, weights, W);
 
     // space efficient dynamic programming
-    int k = static_cast<int>(W * TABLE_MULTIPLIER);
+    int k = ((n * W) / ALPHA);
     Result spaceEfficientResult = spaceEfficient(values, weights, W, k);
 
     // greedy approach
@@ -290,7 +289,7 @@ int main(int argc, char* argv[]) {
 
     //output section
     std::cout << "File containing the capacity, weights, and values are: " << capacityFile << ", " << weightsFile << ", " << valuesFile << std::endl << std::endl;
-    std::cout << "Knapsack capacity = " << W << ". Total number of items = " << values.size() << std::endl << std::endl;
+    std::cout << "Knapsack capacity = " << W << ". Total number of items = " << n << std::endl << std::endl;
     
 
     //trad results
