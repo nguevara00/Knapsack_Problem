@@ -224,36 +224,30 @@ Result spaceEfficient(const std::vector<int>& v, const std::vector<int>& w, int 
     return result;
 }
 
-
-void merge(std::vector<int>& arr, int left, int mid, int right);
-
-
-void mergeSort(std::vector<std::pair<int, int>>& arr, int left, int right){
-    if (right - left > 1){
-        int mid = left + (right - left) / 2;
-        mergeSort(arr, left, mid);
-        mergeSort(arr, mid + 1, right);
-        merge(arr, left, mid, right);
-    }
-}
-void merge(std::vector<std::pair<int, int>>& arr, int left, int mid, int right){
+void merge(std::vector<std::pair<double, int>>& arr, int left, int mid, int right, int& opCount) {
     int n1 = mid - left + 1;
     int n2 = right - mid;
     // create temp arrays
-    std::vector<std::pair<int, int>> L(n1);
-    std::vector<std::pair<int, int>> R(n2);
+    std::vector<std::pair<double, int>> L(n1);
+    std::vector<std::pair<double, int>> R(n2);
+
     // copy & merge data to temp arrays
-    for (int i = 0; i < n1; i++){
+    for (int i = 0; i < n1; i++) {
         L[i] = arr[left + i];
     }
-    for (int j = 0; j < n2; j++){
+
+    for (int j = 0; j < n2; j++) {
         R[j] = arr[mid + 1 + j];
     }
 
-    int i = 0, j = 0, k = left;
-    // copy the elements of the temp arrays back to the original array, merging them 
-    while (i < n1 && j < n2){
-        if (L[i] <= R[j]){
+    int i = 0;
+    int j = 0;
+    int k = left;
+
+    while (i < n1 && j < n2) {
+        opCount++;
+
+        if (L[i] >= R[j]) {   // sort in descending order based on ratio
             arr[k] = L[i];
             i++;
         }
@@ -261,36 +255,69 @@ void merge(std::vector<std::pair<int, int>>& arr, int left, int mid, int right){
             arr[k] = R[j];
             j++;
         }
-        k++;
-    }
-    // copy the remaining elements of L, if there are any
-    while (i < n1){
-        arr[k] = L[i];
-        i++;
+
         k++;
     }
 
-    while (j < n2){
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    } // copy the remaining elements of R, if there are any
+
+    while (j < n2) {
         arr[k] = R[j];
         j++;
         k++;
     }
 }
 
-Result greedyFunction(const std::vector<int>& v, const std::vector<int>& w, int j){
-    std::vector<std::pair<int, int>> ratioList(v.size());
-    for (int i = 0; i < v.size(); i++) {
-        ratioList[i].first = v[i] / w[i];
-        ratioList[i].second = i;
+void mergeSort(std::vector<std::pair<double, int>>& arr, int left, int right, int& opCount) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        mergeSort(arr, left, mid, opCount); // sort first half
+        mergeSort(arr, mid + 1, right, opCount); // sort second half
+        merge(arr, left, mid, right, opCount); // merge the sorted halves
     }
-    // Sort items by ratio in descending order
-    mergeSort(ratioList, 0, ratioList.size() - 1);
-    // Select items with highest ratios until capacity is reached
-    // Implementation for selecting items goes here
-    for (int i = 0; i < ratioList.size(); i++){
-    std::cout << "Ratio: " << ratioList[i].first << ", Index: " << ratioList[i].second << std::endl;
+}
+
+Result greedyFunction(const std::vector<int>& v, const std::vector<int>& w, int capacity) {
+    std::vector<std::pair<double, int>> ratioList(v.size());
+
+    for (std::size_t i = 0; i < v.size(); i++) {
+        ratioList[i].first = static_cast<double>(v[i]) / w[i];
+        ratioList[i].second = static_cast<int>(i);
     }
-    return Result(); // Placeholder return, replace with actual result
+
+    int opCount = 0;
+
+    if (!ratioList.empty()) {
+        mergeSort(ratioList, 0, static_cast<int>(ratioList.size()) - 1, opCount);
+    }
+
+    std::stack<int> outputSet;
+    int greedyValue = 0;
+    int tempCapacity = capacity;
+
+    for (std::size_t i = 0; i < ratioList.size() && tempCapacity > 0; i++) {
+        int itemIndex = ratioList[i].second;
+
+        opCount++; // counts one greedy item-fit check
+
+        if (tempCapacity >= w[itemIndex]) {
+            tempCapacity -= w[itemIndex];
+            greedyValue += v[itemIndex];
+            outputSet.push(itemIndex + 1);
+        }
+    }
+
+    Result out;
+    out.basicOps = opCount;
+    out.optimalSet = outputSet;
+    out.optimalValue = greedyValue;
+
+    return out;
 }
 
 // heap based greedy approach
@@ -389,7 +416,7 @@ int main(int argc, char* argv[]) {
     std::cout << "}" << std::endl;
     std::cout << "(1b) Memory-function Dynamic Programming Total Basic Ops: " << memoryFunctionResult.basicOps << std::endl << std::endl;
 
-    
+
     //hash results
     std::cout << "(1c) Space-Efficient Dynamic Programming Optimal value: " << spaceEfficientResult.optimalValue <<std::endl;
     std::cout << "(1c) Space-Efficient Dynamic Programming Optimal subset: {";
@@ -405,9 +432,17 @@ int main(int argc, char* argv[]) {
     std::cout << "(1c) Space-Efficient Dynamic Programming Space Taken: " << k << std::endl << std::endl;
 
     //greedy results
-    std::cout << "(2a) Greedy Approach Optimal value: not yet implemented" << std::endl;
-    std::cout << "(2a) Greedy Approach Optimal subset: not yet implemented" << std::endl;
-    std::cout << "(2a) Greedy Approach Total Basic Ops: not yet implemented" << std::endl << std::endl;
+    std::cout << "(2a) Greedy Approach Optimal value: " << greedyResult.optimalValue << std::endl;
+    std::cout << "(2a) Greedy Approach Optimal subset: {";
+    while (!greedyResult.optimalSet.empty()){
+        std::cout << greedyResult.optimalSet.top();
+        greedyResult.optimalSet.pop();
+        if (!greedyResult.optimalSet.empty()){
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
+    std::cout << "(2a) Greedy Approach Total Basic Ops: " << greedyResult.basicOps << std::endl << std::endl;
 
     //heap results
     std::cout << "(2b) Heap-based Greedy Approach Optimal value: not yet implemented" << std::endl;
