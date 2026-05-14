@@ -12,8 +12,8 @@ HashTable::HashTable(const int& k, const int& W){
     buckets.resize(k, nullptr);
 }
 
-void HashTable::insert(int i, int j, int value){
-    int index = hash(i,j);
+void HashTable::insert(int i, int j, int value, int& opCount){
+    int index = hash(i,j,opCount);
     Node* newNode = new Node;
     newNode->i = i;
     newNode->j = j;
@@ -23,7 +23,7 @@ void HashTable::insert(int i, int j, int value){
     }
 
 int HashTable::lookup(int i, int j, int& opCount){
-    int index = hash(i,j);
+    int index = hash(i,j,opCount);
     Node* current = buckets[index];
     while (current != nullptr){
         opCount++;
