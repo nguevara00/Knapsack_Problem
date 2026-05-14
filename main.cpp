@@ -34,6 +34,7 @@ Task Tracking -
 #include <string>
 #include <stack>
 #include "HashTable.h"
+#include "Heap.h"
 
 using matrix = std::vector<std::vector<int>>;
 const int ALPHA = 4; // ask me about this 
@@ -295,6 +296,14 @@ Result greedyFunction(const std::vector<int>& v, const std::vector<int>& w, int 
     if (!ratioList.empty()) {
         mergeSort(ratioList, 0, static_cast<int>(ratioList.size()) - 1, opCount);
     }
+    else{
+        Result out;
+        out.basicOps = opCount;
+        out.optimalSet = std::stack<int>();
+        out.optimalValue = 0;
+
+        return out;
+    }
 
     std::stack<int> outputSet;
     int greedyValue = 0;
@@ -320,8 +329,51 @@ Result greedyFunction(const std::vector<int>& v, const std::vector<int>& w, int 
     return out;
 }
 
-// heap based greedy approach
-// not yet implemented
+Result heapFunction(const std::vector<int>& v, const std::vector<int>& w, int capacity) {
+    std::vector<std::pair<double, int>> ratioList(v.size());
+
+    for (std::size_t i = 0; i < v.size(); i++) {
+        ratioList[i].first = static_cast<double>(v[i]) / w[i];
+        ratioList[i].second = static_cast<int>(i);
+    }
+
+    int opCount = 0;
+    heap h(ratioList);
+
+    if (!ratioList.empty()) {
+        opCount = h.getOpCount();
+    } else {
+        Result out;
+        out.basicOps = opCount;
+        out.optimalSet = std::stack<int>();
+        out.optimalValue = 0;
+
+        return out;
+    }
+
+    std::stack<int> outputSet;
+    int greedyValue = 0;
+    int tempCapacity = capacity;
+
+    for (std::size_t i = 0; i < ratioList.size() && tempCapacity > 0; i++) {
+        int itemIndex = h.extractMax().second;
+
+        opCount++; // counts one greedy item-fit check
+
+        if (tempCapacity >= w[itemIndex]) {
+            tempCapacity -= w[itemIndex];
+            greedyValue += v[itemIndex];
+            outputSet.push(itemIndex + 1);
+        }
+    }
+
+    Result out = Result();
+    out.basicOps = opCount;
+    out.optimalSet = outputSet;
+    out.optimalValue = greedyValue;
+
+    return out;
+}
 
 int main(int argc, char* argv[]) {
 	
@@ -380,7 +432,7 @@ int main(int argc, char* argv[]) {
     Result greedyResult = greedyFunction(values, weights, W);
 
     // heap based greedy approach
-    //      not yet implemented
+    Result heapResult = heapFunction(values, weights, W);
 
 
 
@@ -445,9 +497,17 @@ int main(int argc, char* argv[]) {
     std::cout << "(2a) Greedy Approach Total Basic Ops: " << greedyResult.basicOps << std::endl << std::endl;
 
     //heap results
-    std::cout << "(2b) Heap-based Greedy Approach Optimal value: not yet implemented" << std::endl;
-    std::cout << "(2b) Heap-based Greedy Approach Optimal subset: not yet implemented" << std::endl;
-    std::cout << "(2b) Heap-based Greedy Approach Total Basic Ops: not yet implemented" << std::endl << std::endl;
+    std::cout << "(2b) Heap-based Greedy Approach Optimal value: " << heapResult.optimalValue << std::endl;
+    std::cout << "(2b) Heap-based Greedy Approach Optimal subset: {";
+    while (!heapResult.optimalSet.empty()){
+        std::cout << heapResult.optimalSet.top();
+        heapResult.optimalSet.pop();
+        if (!heapResult.optimalSet.empty()){
+            std::cout << ", ";
+        }
+    }
+    std::cout << "}" << std::endl;
+    std::cout << "(2b) Heap-based Greedy Approach Total Basic Ops: " << heapResult.basicOps << std::endl << std::endl;
 
     return 0;
 }
