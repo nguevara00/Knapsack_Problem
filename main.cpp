@@ -225,6 +225,76 @@ Result spaceEfficient(const std::vector<int>& v, const std::vector<int>& w, int 
 }
 
 
+void merge(std::vector<int>& arr, int left, int mid, int right);
+
+
+void mergeSort(std::vector<std::pair<int, int>>& arr, int left, int right){
+    if (right - left > 1){
+        int mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
+}
+void merge(std::vector<std::pair<int, int>>& arr, int left, int mid, int right){
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+    // create temp arrays
+    std::vector<std::pair<int, int>> L(n1);
+    std::vector<std::pair<int, int>> R(n2);
+    // copy & merge data to temp arrays
+    for (int i = 0; i < n1; i++){
+        L[i] = arr[left + i];
+    }
+    for (int j = 0; j < n2; j++){
+        R[j] = arr[mid + 1 + j];
+    }
+
+    int i = 0, j = 0, k = left;
+    // copy the elements of the temp arrays back to the original array, merging them 
+    while (i < n1 && j < n2){
+        if (L[i] <= R[j]){
+            arr[k] = L[i];
+            i++;
+        }
+        else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+    // copy the remaining elements of L, if there are any
+    while (i < n1){
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2){
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+Result greedyFunction(const std::vector<int>& v, const std::vector<int>& w, int j){
+    std::vector<std::pair<int, int>> ratioList(v.size());
+    for (int i = 0; i < v.size(); i++) {
+        ratioList[i].first = v[i] / w[i];
+        ratioList[i].second = i;
+    }
+    // Sort items by ratio in descending order
+    mergeSort(ratioList, 0, ratioList.size() - 1);
+    // Select items with highest ratios until capacity is reached
+    // Implementation for selecting items goes here
+    for (int i = 0; i < ratioList.size(); i++){
+    std::cout << "Ratio: " << ratioList[i].first << ", Index: " << ratioList[i].second << std::endl;
+    }
+    return Result(); // Placeholder return, replace with actual result
+}
+
+// heap based greedy approach
+// not yet implemented
 
 int main(int argc, char* argv[]) {
 	
@@ -280,8 +350,8 @@ int main(int argc, char* argv[]) {
     Result spaceEfficientResult = spaceEfficient(values, weights, W, k);
 
     // greedy approach
-    //      not yet implemented
-    
+    Result greedyResult = greedyFunction(values, weights, W);
+
     // heap based greedy approach
     //      not yet implemented
 
@@ -303,6 +373,7 @@ int main(int argc, char* argv[]) {
         }
     }
     std::cout << "}" << std::endl;
+
     std::cout << "(1a) Traditional Dynamic Programming Total Basic Ops: " << traditionalDynamicResult.basicOps << std::endl << std::endl;
 
     //mem results
@@ -318,7 +389,7 @@ int main(int argc, char* argv[]) {
     std::cout << "}" << std::endl;
     std::cout << "(1b) Memory-function Dynamic Programming Total Basic Ops: " << memoryFunctionResult.basicOps << std::endl << std::endl;
 
-
+    
     //hash results
     std::cout << "(1c) Space-Efficient Dynamic Programming Optimal value: " << spaceEfficientResult.optimalValue <<std::endl;
     std::cout << "(1c) Space-Efficient Dynamic Programming Optimal subset: {";
