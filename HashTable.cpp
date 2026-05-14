@@ -1,6 +1,6 @@
 #include "HashTable.h"
 
-int HashTable::hash(int i, int j){
+int HashTable::hash(int i, int j, int& opCount){
     return ((i-1) * W + j) % k;
     opCount++;
 }
