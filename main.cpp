@@ -205,7 +205,7 @@ int spaceEfficientHelper(const std::vector<int>& v, const std::vector<int>& w, i
         solution = std::max(spaceEfficientHelper(v, w, i-1, j, hashTable, opCount), v[i-1] + spaceEfficientHelper(v,w,i-1,j-w[i-1], hashTable, opCount));
     }
 
-    hashTable.insert(i,j,solution);
+    hashTable.insert(i,j,solution,opCount);
     opCount++;
     return solution;
 }
