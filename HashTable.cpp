@@ -2,6 +2,7 @@
 
 int HashTable::hash(int i, int j){
     return ((i-1) * W + j) % k;
+    opCount++;
 }
 
 HashTable::HashTable(const int& k, const int& W){
