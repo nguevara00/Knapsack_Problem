@@ -8,7 +8,7 @@ Task Tracking -
 
 	PROGRAMMING -
 		all tasks working
-        refactor 1a, 1b, 1c, 2a, 2b into classes - 2/5
+        all functions refactored into classes
 			
 	REPORT -
 		Graph 1A vs 1B - 0/1
@@ -36,7 +36,7 @@ Task Tracking -
 #include "SpaceEfficient.h"
 #include "Greedy.h"
 
-const int ALPHA = 4; // ask me about this 
+const int ALPHA = 4; // tuning parameter for space vs time tradeoff in 1c hash table approach
 
 int main(int argc, char* argv[]) {
 	
@@ -79,12 +79,16 @@ int main(int argc, char* argv[]) {
         std::cerr << "Weights and Values files are different sizes." << std::endl;
     }
 
+    //initialize parameters from input
     int W = capacity[0];
     int n = static_cast<int>(values.size());
     int k = ((n * W) / ALPHA);
-
+    
+    //print input stats
     std::cout << "File containing the capacity, weights, and values are: " << capacityFile << ", " << weightsFile << ", " << valuesFile << std::endl << std::endl;
     std::cout << "Knapsack capacity = " << W << ". Total number of items = " << n << std::endl << std::endl;
+
+    //solve the knapsack
 
     // traditional dynamic programming
     DynamicKnapsack tradKnapsack(values, weights, n, W);
