@@ -7,11 +7,8 @@
 Task Tracking -
 
 	PROGRAMMING -
-		1A - 3/3
-		1B - 3/3
-		1C - 3/4
-		2A - 0/3
-		2B - 0/3
+		all tasks working
+        refactor 1a, 1b, 1c, 2a, 2b into classes - 2/5
 			
 	REPORT -
 		Graph 1A vs 1B - 0/1
@@ -64,23 +61,6 @@ bool fileToVector(const std::string& filename, std::vector<int>& values){
     return true;
 }
 
-//recursive helper for dynamic programming approaches, builds the set of items that were chosen in the optimal solution of the knapsack problem
-std::stack<int> optimalSetBuilder(std::stack<int>& set, int i, int j, const std::vector<int>& v, const std::vector<int>& w, const matrix& solutionGrid, int& opCount){
-    //the basic operation is comparison, each call compares one pair of cells
-    opCount++;
-    if (i == 0 || j == 0){
-        return set;
-    }
-    else if (solutionGrid[i][j] > solutionGrid[i-1][j]) {
-        set.push(i);
-        optimalSetBuilder(set, i-1, j-w[i-1], v, w, solutionGrid, opCount);
-    }
-    else {
-        optimalSetBuilder(set,i-1,j,v,w,solutionGrid, opCount);
-    }
-    return set;
-}
-
 //recursive helper for space-efficient approach, builds the set of items that were chosen in the optimal solution of the knapsack problem
 std::stack<int> optimalSetBuilderHash(std::stack<int>& set, int i, int j, const std::vector<int>& v, const std::vector<int>& w, HashTable& hashTable, int& opCount){
     //the basic operation is comparison, each call compares one pair of cells
@@ -105,54 +85,6 @@ std::stack<int> optimalSetBuilderHash(std::stack<int>& set, int i, int j, const 
         optimalSetBuilderHash(set,i-1,j,v,w,hashTable, opCount);
     }
     return set;
-}
-
-
-
-//Built off of the traditional dynamic programming approach, fills the solution matrix for the knapsack problem from both ends
-// assume solutionGrid is initialized to -1 for all cells, so that we can check if a cell has been filled or not
-// Recursive function, therefore memoryFunction() will be a shell around a recursive helper function that fills the solution grid
-int memoryHelper(const std::vector<int>& v, const std::vector<int>& w, int i, int j, matrix& solutionGrid, int& opCount){
-    // added base case, first rows and columns must be zero
-    if (i == 0 || j == 0) {
-        if (solutionGrid[i][j] == -1) {
-            solutionGrid[i][j] = 0;
-            opCount++;
-        }
-        return solutionGrid[i][j];
-    }
-
-    if (solutionGrid[i][j] != -1) {
-        return solutionGrid[i][j];
-    }
-
-    opCount++;
-
-    if (j < w[i - 1]) {
-        solutionGrid[i][j] = memoryHelper(v, w, i - 1, j, solutionGrid, opCount);
-    } else {
-        int exclude = memoryHelper(v, w, i - 1, j, solutionGrid, opCount);
-        int include = v[i - 1] + memoryHelper(v, w, i - 1, j - w[i - 1], solutionGrid, opCount);
-
-        solutionGrid[i][j] = std::max(exclude, include);
-    }
-
-    return solutionGrid[i][j];
-}
-
-Result memoryFunction(const std::vector<int>& v, const std::vector<int>& w, int W){
-    int opCount = 0;
-    int n = static_cast<int>(v.size());
-    matrix solutionGrid(n + 1, std::vector<int>(W + 1, -1));
-    memoryHelper(v, w, n, W, solutionGrid, opCount);
-    std::stack<int> set;
-    Result result;
-
-    result.optimalSet = optimalSetBuilder(set, n, W, v, w, solutionGrid, opCount);
-    result.basicOps = opCount;
-    result.optimalValue = solutionGrid[n][W];
-
-    return result;
 }
 
 //Space-efficient Dynamic Programming
@@ -395,13 +327,13 @@ int main(int argc, char* argv[]) {
     std::cout << "File containing the capacity, weights, and values are: " << capacityFile << ", " << weightsFile << ", " << valuesFile << std::endl << std::endl;
     std::cout << "Knapsack capacity = " << W << ". Total number of items = " << n << std::endl << std::endl;
 
-    // traditional dynamic programming
-    DynamicKnapsack knapsack(values, weights, n, W);
-    knapsack.solveTraditional();
-    knapsack.printResult();
+    DynamicKnapsack tradKnapsack(values, weights, n, W);
+    tradKnapsack.solveTraditional();
+    tradKnapsack.printTradResult();
 
-    // memory function dynamic programming
-    Result memoryFunctionResult = memoryFunction(values, weights, W);
+    DynamicKnapsack memKnapsack(values,weights,n,W);
+    memKnapsack.solveMemoryFunction();
+    memKnapsack.printMemoryResult();
 
     // space efficient dynamic programming
     int k = ((n * W) / ALPHA);
@@ -412,20 +344,6 @@ int main(int argc, char* argv[]) {
 
     // heap based greedy approach
     Result heapResult = heapFunction(values, weights, W);
-
-    //mem results
-    std::cout << "(1b) Memory-function Dynamic Programming Optimal value: " << memoryFunctionResult.optimalValue << std::endl;
-    std::cout << "(1b) Memory-function Dynamic Programming Optimal subset: {";
-     while (!memoryFunctionResult.optimalSet.empty()){
-        std::cout << memoryFunctionResult.optimalSet.top();
-        memoryFunctionResult.optimalSet.pop();
-        if (!memoryFunctionResult.optimalSet.empty()){
-            std::cout << ", ";
-        }
-    }
-    std::cout << "}" << std::endl;
-    std::cout << "(1b) Memory-function Dynamic Programming Total Basic Ops: " << memoryFunctionResult.basicOps << std::endl << std::endl;
-
 
     //hash results
     std::cout << "(1c) Space-Efficient Dynamic Programming Optimal value: " << spaceEfficientResult.optimalValue <<std::endl;

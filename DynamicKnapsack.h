@@ -18,6 +18,7 @@ private:
     int optimalValue;
     int basicOps;
     void optimalSetBuilder(int i, int j, const matrix& solutionGrid);
+    int memoryHelper(int i, int j, matrix& solutionGrid);
     
 public:
     DynamicKnapsack(const std::vector<int>& v, const std::vector<int>& w, const int& n, const int& W){
@@ -28,7 +29,12 @@ public:
     }
 
     void solveTraditional();
-    void printResult();
+    void printTradResult();
+    
+    void solveMemoryFunction();
+    void printMemoryResult();
+
+    
 };
 
 #endif
