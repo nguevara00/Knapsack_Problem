@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <iostream>
 
-//recursive helper for space-efficient approach, builds the set of items that were chosen in the optimal solution of the knapsack problem
 void SpaceEfficient::optimalSetBuilderHash(int i, int j, HashTable& hashTable){
     //the basic operation is comparison, each call compares one pair of cells
     basicOps++;
@@ -28,9 +27,7 @@ void SpaceEfficient::optimalSetBuilderHash(int i, int j, HashTable& hashTable){
     }
 }
 
-//Space-efficient Dynamic Programming
 int SpaceEfficient::spaceEfficientHelper(int i, int j, HashTable& hashTable){
-    
     if (i == 0  || j == 0){
         return 0;
     }
@@ -60,7 +57,6 @@ void SpaceEfficient::solveSpaceEfficient(){
 }
 
 void SpaceEfficient::printSpaceResult(){
-    //hash results
     std::cout << "(1c) Space-Efficient Dynamic Programming Optimal value: " << optimalValue <<std::endl;
     std::cout << "(1c) Space-Efficient Dynamic Programming Optimal subset: {";
     while (!optimalSet.empty()){

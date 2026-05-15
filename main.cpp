@@ -25,117 +25,18 @@ Task Tracking -
 */
 
 #include <fstream>
-#include <algorithm> //std::max
-#include <vector>
 #include <iostream>
 #include <string>
-#include <stack>
+#include <vector>
+
 #include "HashTable.h"
 #include "Heap.h"
 #include "DynamicKnapsack.h"
 #include "Utils.h"
 #include "SpaceEfficient.h"
+#include "Greedy.h"
 
 const int ALPHA = 4; // ask me about this 
-
-struct Result {
-    int basicOps;
-    std::stack<int> optimalSet;
-    int optimalValue;
-};
-
-
-Result greedyFunction(const std::vector<int>& v, const std::vector<int>& w, int capacity) {
-    std::vector<std::pair<double, int>> ratioList(v.size());
-    int opCount = 0;
-
-    for (std::size_t i = 0; i < v.size(); i++) {
-        opCount++;
-        ratioList[i].first = static_cast<double>(v[i]) / w[i];
-        ratioList[i].second = static_cast<int>(i);
-    }
-
-    if (!ratioList.empty()) {
-        mergeSort(ratioList, 0, static_cast<int>(ratioList.size()) - 1, opCount);
-    }
-    else{
-        Result out;
-        out.basicOps = opCount;
-        out.optimalSet = std::stack<int>();
-        out.optimalValue = 0;
-
-        return out;
-    }
-
-    std::stack<int> outputSet;
-    int greedyValue = 0;
-    int tempCapacity = capacity;
-
-    for (std::size_t i = 0; i < ratioList.size() && tempCapacity > 0; i++) {
-        int itemIndex = ratioList[i].second;
-
-        opCount++; // counts one greedy item-fit check
-
-        if (tempCapacity >= w[itemIndex]) {
-            tempCapacity -= w[itemIndex];
-            greedyValue += v[itemIndex];
-            outputSet.push(itemIndex + 1);
-        }
-    }
-
-    Result out;
-    out.basicOps = opCount;
-    out.optimalSet = outputSet;
-    out.optimalValue = greedyValue;
-
-    return out;
-}
-
-Result heapFunction(const std::vector<int>& v, const std::vector<int>& w, int capacity) {
-    std::vector<std::pair<double, int>> ratioList(v.size());
-    int opCount = 0;
-
-    for (std::size_t i = 0; i < v.size(); i++) {
-        opCount++;
-        ratioList[i].first = static_cast<double>(v[i]) / w[i];
-        ratioList[i].second = static_cast<int>(i);
-    }
-    heap h(ratioList);
-
-    if (!ratioList.empty()) {
-        opCount += h.getOpCount();
-    } else {
-        Result out;
-        out.basicOps = opCount;
-        out.optimalSet = std::stack<int>();
-        out.optimalValue = 0;
-
-        return out;
-    }
-
-    std::stack<int> outputSet;
-    int greedyValue = 0;
-    int tempCapacity = capacity;
-
-    for (std::size_t i = 0; i < ratioList.size() && tempCapacity > 0; i++) {
-        int itemIndex = h.extractMax().second;
-
-        opCount++; // counts one greedy item-fit check
-
-        if (tempCapacity >= w[itemIndex]) {
-            tempCapacity -= w[itemIndex];
-            greedyValue += v[itemIndex];
-            outputSet.push(itemIndex + 1);
-        }
-    }
-
-    Result out = Result();
-    out.basicOps = opCount;
-    out.optimalSet = outputSet;
-    out.optimalValue = greedyValue;
-
-    return out;
-}
 
 int main(int argc, char* argv[]) {
 	
@@ -201,38 +102,14 @@ int main(int argc, char* argv[]) {
     hashKnapsack.printSpaceResult();
 
     // greedy approach
-    Result greedyResult = greedyFunction(values, weights, W);
+    Greedy greedyKnapsack(values, weights, n, W);
+    greedyKnapsack.greedyFunction();
+    greedyKnapsack.greedyPrintResults();
 
     // heap based greedy approach
-    Result heapResult = heapFunction(values, weights, W);
-
-    
-
-    //greedy results
-    std::cout << "(2a) Greedy Approach Optimal value: " << greedyResult.optimalValue << std::endl;
-    std::cout << "(2a) Greedy Approach Optimal subset: {";
-    while (!greedyResult.optimalSet.empty()){
-        std::cout << greedyResult.optimalSet.top();
-        greedyResult.optimalSet.pop();
-        if (!greedyResult.optimalSet.empty()){
-            std::cout << ", ";
-        }
-    }
-    std::cout << "}" << std::endl;
-    std::cout << "(2a) Greedy Approach Total Basic Ops: " << greedyResult.basicOps << std::endl << std::endl;
-
-    //heap results
-    std::cout << "(2b) Heap-based Greedy Approach Optimal value: " << heapResult.optimalValue << std::endl;
-    std::cout << "(2b) Heap-based Greedy Approach Optimal subset: {";
-    while (!heapResult.optimalSet.empty()){
-        std::cout << heapResult.optimalSet.top();
-        heapResult.optimalSet.pop();
-        if (!heapResult.optimalSet.empty()){
-            std::cout << ", ";
-        }
-    }
-    std::cout << "}" << std::endl;
-    std::cout << "(2b) Heap-based Greedy Approach Total Basic Ops: " << heapResult.basicOps << std::endl << std::endl;
+    Greedy heapKnapsack(values, weights, n, W);
+    heapKnapsack.heapFunction();
+    heapKnapsack.heapPrintResults();    
 
     return 0;
 }
