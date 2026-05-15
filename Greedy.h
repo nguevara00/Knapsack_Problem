@@ -23,10 +23,10 @@ class Greedy{
             this->v = v;
             this->w = w;
         }
-        void greedyFunction();
-        void heapFunction();
-        void greedyPrintResults();
-        void heapPrintResults();
+        void solveGreedy();
+        void solveHeap();
+        void printGreedyResults();
+        void printHeapResults();
 
 };
 #endif

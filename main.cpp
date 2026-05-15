@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
     int W = capacity[0];
     int n = static_cast<int>(values.size());
     int k = ((n * W) / ALPHA);
-    
+
     //print input stats
     std::cout << "File containing the capacity, weights, and values are: " << capacityFile << ", " << weightsFile << ", " << valuesFile << std::endl << std::endl;
     std::cout << "Knapsack capacity = " << W << ". Total number of items = " << n << std::endl << std::endl;
@@ -107,13 +107,13 @@ int main(int argc, char* argv[]) {
 
     // greedy approach
     Greedy greedyKnapsack(values, weights, n, W);
-    greedyKnapsack.greedyFunction();
-    greedyKnapsack.greedyPrintResults();
+    greedyKnapsack.solveGreedy();
+    greedyKnapsack.printGreedyResults();
 
     // heap based greedy approach
     Greedy heapKnapsack(values, weights, n, W);
-    heapKnapsack.heapFunction();
-    heapKnapsack.heapPrintResults();    
+    heapKnapsack.solveHeap();
+    heapKnapsack.printHeapResults();    
 
     return 0;
 }

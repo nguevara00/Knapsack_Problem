@@ -4,7 +4,7 @@
 #include "Heap.h"
 #include <iostream>
 
-void Greedy::greedyFunction() {
+void Greedy::solveGreedy() {
     std::vector<std::pair<double, int>> ratioList(n);
     int tempCapacity = W;
 
@@ -39,7 +39,7 @@ void Greedy::greedyFunction() {
     return;
 }
 
-void Greedy::heapFunction() {
+void Greedy::solveHeap() {
     std::vector<std::pair<double, int>> ratioList(n);
 
     for (std::size_t i = 0; i < v.size(); i++) {
@@ -74,7 +74,7 @@ void Greedy::heapFunction() {
     return;
 }
 
-void Greedy::greedyPrintResults(){
+void Greedy::printGreedyResults(){
     //greedy results
     std::cout << "(2a) Greedy Approach Optimal value: " << optimalValue << std::endl;
     std::cout << "(2a) Greedy Approach Optimal subset: {";
@@ -89,7 +89,7 @@ void Greedy::greedyPrintResults(){
     std::cout << "(2a) Greedy Approach Total Basic Ops: " << basicOps << std::endl << std::endl;
 }
 
-void Greedy::heapPrintResults(){
+void Greedy::printHeapResults(){
     std::cout << "(2b) Heap-based Greedy Approach Optimal value: " << optimalValue << std::endl;
     std::cout << "(2b) Heap-based Greedy Approach Optimal subset: {";
     while (!optimalSet.empty()){
