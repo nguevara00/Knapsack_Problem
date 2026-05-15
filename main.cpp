@@ -35,6 +35,7 @@ Task Tracking -
 #include <stack>
 #include "HashTable.h"
 #include "Heap.h"
+#include "DynamicKnapsack.h"
 
 using matrix = std::vector<std::vector<int>>;
 const int ALPHA = 4; // ask me about this 
@@ -106,39 +107,7 @@ std::stack<int> optimalSetBuilderHash(std::stack<int>& set, int i, int j, const 
     return set;
 }
 
-//traditional dynamic programming, fills the solution matrix for the knapsack problem
-Result traditionalDynamic(const std::vector<int>& v, const std::vector<int>& w, int W){
-    
-    int opCount = 0;
-    std::stack<int> set;
-    Result result;
-    int n = static_cast<int>(v.size());
-    matrix solutionGrid(n + 1, std::vector<int>(W + 1, 0));
-    
-    // fill the cells and count the basic operations.
-    // define 1 basic operation as filling a cell, since each branch of the loop does this in constant time. 
-    for (int i = 0; i <= n; i++){
-        for (int j = 0; j <= W; j++){
-            opCount++;
-            if (i == 0 || j == 0){
-                solutionGrid[i][j] = 0;
-            }
 
-            else if (j - w[i-1] >= 0) {
-                solutionGrid[i][j] = std::max(solutionGrid[i-1][j], v[i-1] + solutionGrid[i-1][j-w[i-1]]);
-            }
-            else {
-                solutionGrid[i][j] = solutionGrid[i-1][j];
-            }   
-        }
-    }
-    
-    result.optimalSet = optimalSetBuilder(set, n, W, v, w, solutionGrid, opCount); 
-    result.basicOps = opCount;
-    result.optimalValue = solutionGrid[n][W];
-
-    return result;
-}
 
 //Built off of the traditional dynamic programming approach, fills the solution matrix for the knapsack problem from both ends
 // assume solutionGrid is initialized to -1 for all cells, so that we can check if a cell has been filled or not
@@ -422,8 +391,14 @@ int main(int argc, char* argv[]) {
 
     int W = capacity[0];
     int n = static_cast<int>(values.size());
+
+    std::cout << "File containing the capacity, weights, and values are: " << capacityFile << ", " << weightsFile << ", " << valuesFile << std::endl << std::endl;
+    std::cout << "Knapsack capacity = " << W << ". Total number of items = " << n << std::endl << std::endl;
+
     // traditional dynamic programming
-    Result traditionalDynamicResult = traditionalDynamic(values, weights, W);
+    DynamicKnapsack knapsack(values, weights, n, W);
+    knapsack.solveTraditional();
+    knapsack.printResult();
 
     // memory function dynamic programming
     Result memoryFunctionResult = memoryFunction(values, weights, W);
@@ -437,27 +412,6 @@ int main(int argc, char* argv[]) {
 
     // heap based greedy approach
     Result heapResult = heapFunction(values, weights, W);
-
-
-
-    //output section
-    std::cout << "File containing the capacity, weights, and values are: " << capacityFile << ", " << weightsFile << ", " << valuesFile << std::endl << std::endl;
-    std::cout << "Knapsack capacity = " << W << ". Total number of items = " << n << std::endl << std::endl;
-    
-
-    //trad results
-    std::cout << "(1a) Traditional Dynamic Programming Optimal value: " << traditionalDynamicResult.optimalValue << std::endl;
-    std::cout << "(1a) Traditional Dynamic Programming Optimal subset: {";
-    while (!traditionalDynamicResult.optimalSet.empty()){
-        std::cout << traditionalDynamicResult.optimalSet.top();
-        traditionalDynamicResult.optimalSet.pop();
-        if (!traditionalDynamicResult.optimalSet.empty()){
-            std::cout << ", ";
-        }
-    }
-    std::cout << "}" << std::endl;
-
-    std::cout << "(1a) Traditional Dynamic Programming Total Basic Ops: " << traditionalDynamicResult.basicOps << std::endl << std::endl;
 
     //mem results
     std::cout << "(1b) Memory-function Dynamic Programming Optimal value: " << memoryFunctionResult.optimalValue << std::endl;
