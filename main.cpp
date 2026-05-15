@@ -25,6 +25,8 @@ Task Tracking -
 */
 
 #include <fstream>
+#include <algorithm> //std::max & std::sort for 2A & B output formatting
+#include <vector>
 #include <iostream>
 #include <string>
 #include <vector>

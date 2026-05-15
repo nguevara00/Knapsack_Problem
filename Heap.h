@@ -13,19 +13,19 @@ class heap{
             heapNodes.emplace_back(ratio, index);
         }
 
-        void heapify(int index){
-            for (size_t i = 0; i < heapNodes.size(); i++)
-            {
-                heapifyDown(heapNodes, heapNodes.size(), i, opCount);
-            }
-            
+    void heapify() {
+        for (int i = static_cast<int>(heapNodes.size()) / 2 - 1; i >= 0; --i) {
+            heapifyDown(heapNodes, static_cast<int>(heapNodes.size()), i, opCount);
         }
+    }
 
         int getOpCount() const {
             return opCount;
         }
 
         heapNode extractMax();
+
+        void printHeap();
 
     private:
         std::vector<heapNode> heapNodes;

@@ -1,12 +1,13 @@
 #include "Heap.h"
 #include <stdexcept>
+#include <iostream>
 
 heap::heap(std::vector<std::pair<double, int>>& ratioList){
     // build the heap from the ratio list
     for(const auto& node : ratioList) {
         insert(node.first, node.second);
     }
-    heapify(0);
+    heapify();
     }
 
 void heap::heapifyDown(std::vector<std::pair<double, int>>& heap,int heapSize, int index, int& opCount) {
@@ -38,15 +39,24 @@ void heap::heapifyDown(std::vector<std::pair<double, int>>& heap,int heapSize, i
     }
 }
 
-    heapNode heap::extractMax(){
-        if (heapNodes.empty()) {
-            throw std::runtime_error("Heap is empty");
-        }
+heapNode heap::extractMax() {
+    if (heapNodes.empty()) {
+        throw std::runtime_error("Heap is empty");
+    }
 
-        heapNode maxNode = heapNodes[0];
-        heapNodes[0] = heapNodes.back();
-        heapNodes.pop_back();
-        heapifyDown(heapNodes, heapNodes.size(), 0, opCount);
+    heapNode maxNode = heapNodes[0];
+    heapNodes[0] = heapNodes.back();
+    heapNodes.pop_back();
 
-        return maxNode;
-        }
+    if (!heapNodes.empty()) {
+        heapifyDown(heapNodes, static_cast<int>(heapNodes.size()), 0, opCount);
+    }
+
+    return maxNode;
+}
+
+void heap::printHeap() {
+    for (const heapNode& node : heapNodes) {
+        std::cout << "Ratio: " << node.first << ", Index: " << node.second << std::endl;
+    }
+}
