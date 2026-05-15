@@ -34,8 +34,8 @@ Task Tracking -
 #include "Heap.h"
 #include "DynamicKnapsack.h"
 #include "Utils.h"
+#include "SpaceEfficient.h"
 
-using matrix = std::vector<std::vector<int>>;
 const int ALPHA = 4; // ask me about this 
 
 struct Result {
@@ -44,70 +44,6 @@ struct Result {
     int optimalValue;
 };
 
-//recursive helper for space-efficient approach, builds the set of items that were chosen in the optimal solution of the knapsack problem
-std::stack<int> optimalSetBuilderHash(std::stack<int>& set, int i, int j, const std::vector<int>& v, const std::vector<int>& w, HashTable& hashTable, int& opCount){
-    //the basic operation is comparison, each call compares one pair of cells
-    opCount++;
-    if (i == 0 || j == 0){
-        return set;
-    }
-    int currentValue = hashTable.lookup(i,j,opCount);
-    int previousValue;
-
-    if (i-1 == 0){
-        previousValue = 0;
-    } else {
-        previousValue = hashTable.lookup(i-1,j,opCount);
-    }
-
-    if (currentValue > previousValue) {
-        set.push(i);
-        optimalSetBuilderHash(set, i-1, j-w[i-1], v, w, hashTable, opCount);
-    }
-    else {
-        optimalSetBuilderHash(set,i-1,j,v,w,hashTable, opCount);
-    }
-    return set;
-}
-
-//Space-efficient Dynamic Programming
-int spaceEfficientHelper(const std::vector<int>& v, const std::vector<int>& w, int i, int j, HashTable& hashTable, int& opCount){
-    
-    if (i == 0  || j == 0){
-        return 0;
-    }
-
-    int stored = hashTable.lookup(i,j,opCount);
-    
-    if (stored != -1){
-        return stored;
-    }
-    int solution;
-
-    if (j < w[i-1]) {
-        solution = spaceEfficientHelper(v,w,i-1,j,hashTable,opCount);
-    } else {
-        solution = std::max(spaceEfficientHelper(v, w, i-1, j, hashTable, opCount), v[i-1] + spaceEfficientHelper(v,w,i-1,j-w[i-1], hashTable, opCount));
-    }
-
-    hashTable.insert(i,j,solution,opCount);
-    opCount++;
-    return solution;
-}
-
-Result spaceEfficient(const std::vector<int>& v, const std::vector<int>& w, int W, int k){
-    int opCount = 0;
-    int n = static_cast<int>(v.size());
-    std::stack<int> set;
-    HashTable hashTable(k, W);
-    Result result;
-
-    result.optimalValue = spaceEfficientHelper(v,w,n,W,hashTable,opCount);
-    result.optimalSet = optimalSetBuilderHash(set, n, W, v, w, hashTable, opCount);
-    result.basicOps = opCount;
-
-    return result;
-}
 
 Result greedyFunction(const std::vector<int>& v, const std::vector<int>& w, int capacity) {
     std::vector<std::pair<double, int>> ratioList(v.size());
@@ -244,6 +180,7 @@ int main(int argc, char* argv[]) {
 
     int W = capacity[0];
     int n = static_cast<int>(values.size());
+    int k = ((n * W) / ALPHA);
 
     std::cout << "File containing the capacity, weights, and values are: " << capacityFile << ", " << weightsFile << ", " << valuesFile << std::endl << std::endl;
     std::cout << "Knapsack capacity = " << W << ". Total number of items = " << n << std::endl << std::endl;
@@ -259,8 +196,9 @@ int main(int argc, char* argv[]) {
     memKnapsack.printMemoryResult();
 
     // space efficient dynamic programming
-    int k = ((n * W) / ALPHA);
-    Result spaceEfficientResult = spaceEfficient(values, weights, W, k);
+    SpaceEfficient hashKnapsack(values, weights, n, W, k);
+    hashKnapsack.solveSpaceEfficient();
+    hashKnapsack.printSpaceResult();
 
     // greedy approach
     Result greedyResult = greedyFunction(values, weights, W);
@@ -268,19 +206,7 @@ int main(int argc, char* argv[]) {
     // heap based greedy approach
     Result heapResult = heapFunction(values, weights, W);
 
-    //hash results
-    std::cout << "(1c) Space-Efficient Dynamic Programming Optimal value: " << spaceEfficientResult.optimalValue <<std::endl;
-    std::cout << "(1c) Space-Efficient Dynamic Programming Optimal subset: {";
-    while (!spaceEfficientResult.optimalSet.empty()){
-        std::cout << spaceEfficientResult.optimalSet.top();
-        spaceEfficientResult.optimalSet.pop();
-        if (!spaceEfficientResult.optimalSet.empty()){
-            std::cout << ", ";
-        }
-    }
-    std::cout << "}" << std::endl;
-    std::cout << "(1c) Space-Efficient Dynamic Programming Total Basic Ops: " << spaceEfficientResult.basicOps << std::endl;
-    std::cout << "(1c) Space-Efficient Dynamic Programming Space Taken: " << k << std::endl << std::endl;
+    
 
     //greedy results
     std::cout << "(2a) Greedy Approach Optimal value: " << greedyResult.optimalValue << std::endl;
