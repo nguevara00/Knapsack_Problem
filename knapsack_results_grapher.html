@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Knapsack Project Results Grapher</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --fg: #111827;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --card: #ffffff;
+    --bg: #f8fafc;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 24px auto;
+    padding: 0 16px;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    margin: 0 0 12px 0;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  select, button, input[type="file"] {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #ffffff;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #f3f4f6;
+  }
+
+  #chart {
+    min-height: 560px;
+    overflow-x: auto;
+  }
+
+  .legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 12px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+
+  .footer {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 12px;
+    line-height: 1.45;
+  }
+
+  .tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: #fff;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--fg);
+    z-index: 20;
+    white-space: nowrap;
+    display: none;
+  }
+
+  .tooltip .hdr {
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .tooltip .sub {
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Knapsack Project Results Grapher</h1>
+
+    <div class="card">
+      <div class="row">
+        <label>Graph type
+          <select id="graphType">
+            <option value="task1ab">Task 1a vs Task 1b: Basic Ops by Case</option>
+            <option value="task1c">Task 1c: k / Space vs Basic Ops</option>
+            <option value="task2">Task 2: Greedy Sort vs Heap Greedy</option>
+            <option value="task1vstask2">Task 1 vs Task 2: Basic Ops + Value</option>
+          </select>
+        </label>
+
+        <label>CSV file
+          <input type="file" id="file" accept=".csv" />
+        </label>
+
+        <label>
+          <input type="checkbox" id="logScale" />
+          Log scale
+        </label>
+
+        <button id="useDefault">Load example data</button>
+      </div>
+
+      <div class="footer">
+        This version uses plain JavaScript and SVG. It does not need D3 or any internet connection.
+      </div>
+    </div>
+
+    <div id="chart" class="card"></div>
+    <div id="legend" class="legend"></div>
+  </div>
+
+  <div id="tooltip" class="tooltip"></div>
+
+<script>
+const sampleData = {
+  task1ab: `case_id,approach,basic_ops,optimal_value
+case1,traditional_dp,1200,37
+case1,memory_function,430,37
+case2,traditional_dp,5200,91
+case2,memory_function,1750,91
+case3,traditional_dp,11000,128
+case3,memory_function,3900,128
+case4,traditional_dp,23000,205
+case4,memory_function,7600,205`,
+
+  task1c: `case_id,hash_function,k,basic_ops,collisions,filled_cells,nW
+case1,hash_vanilla,10,950,52,42,120
+case1,hash_vanilla,20,790,29,42,120
+case1,hash_vanilla,40,720,14,42,120
+case1,hash_vanilla,80,705,7,42,120
+case1,hash_alt,10,910,41,42,120
+case1,hash_alt,20,735,19,42,120
+case1,hash_alt,40,690,8,42,120
+case1,hash_alt,80,685,4,42,120`,
+
+  task2: `case_id,approach,basic_ops,greedy_value
+case1,greedy_sort,360,35
+case1,greedy_heap,210,35
+case2,greedy_sort,880,82
+case2,greedy_heap,470,82
+case3,greedy_sort,1700,119
+case3,greedy_heap,900,119
+case4,greedy_sort,3300,190
+case4,greedy_heap,1600,190`,
+
+  task1vstask2: `case_id,approach,basic_ops,value
+case1,memory_function,430,37
+case1,greedy_heap,210,35
+case2,memory_function,1750,91
+case2,greedy_heap,470,82
+case3,memory_function,3900,128
+case3,greedy_heap,900,119
+case4,memory_function,7600,205
+case4,greedy_heap,1600,190`
+};
+
+const colors = {
+  traditional_dp: '#1f77b4',
+  memory_function: '#ff7f0e',
+  greedy_sort: '#2ca02c',
+  greedy_heap: '#d62728',
+  hash_vanilla: '#9467bd',
+  hash_alt: '#8c564b'
+};
+
+const fallbackColors = ['#17becf', '#bcbd22', '#e377c2', '#7f7f7f', '#000000'];
+
+let rows = [];
+
+const graphTypeSelect = document.getElementById('graphType');
+const fileInput = document.getElementById('file');
+const logScaleCheckbox = document.getElementById('logScale');
+const useDefaultButton = document.getElementById('useDefault');
+const chartDiv = document.getElementById('chart');
+const legendDiv = document.getElementById('legend');
+const tooltip = document.getElementById('tooltip');
+
+useDefaultButton.addEventListener('click', loadSampleData);
+graphTypeSelect.addEventListener('change', loadSampleData);
+logScaleCheckbox.addEventListener('change', render);
+
+fileInput.addEventListener('change', function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function() {
+    rows = parseCSV(reader.result);
+    render();
+  };
+  reader.readAsText(file);
+});
+
+function loadSampleData() {
+  const graphType = graphTypeSelect.value;
+  rows = parseCSV(sampleData[graphType]);
+  render();
+}
+
+function parseCSV(text) {
+  const cleanText = text.trim().replace(/\r\n/g, '\n');
+  const lines = cleanText.split('\n');
+  const headers = lines[0].split(',').map(h => h.trim());
+
+  return lines.slice(1).map(line => {
+    const values = line.split(',').map(v => v.trim());
+    const row = {};
+
+    headers.forEach((header, index) => {
+      row[header] = values[index];
+    });
+
+    convertNumber(row, 'basic_ops');
+    convertNumber(row, 'optimal_value');
+    convertNumber(row, 'greedy_value');
+    convertNumber(row, 'value');
+    convertNumber(row, 'k');
+    convertNumber(row, 'collisions');
+    convertNumber(row, 'filled_cells');
+    convertNumber(row, 'nW');
+
+    return row;
+  });
+}
+
+function convertNumber(row, key) {
+  if (row[key] === undefined || row[key] === '') return;
+  const number = Number(row[key]);
+  if (!Number.isNaN(number)) row[key] = number;
+}
+
+function render() {
+  const graphType = graphTypeSelect.value;
+
+  if (graphType === 'task1ab') {
+    renderLineChart({
+      title: 'Task 1a vs Task 1b: Basic Operations by Case',
+      xType: 'category',
+      xColumn: 'case_id',
+      yColumn: 'basic_ops',
+      groupColumn: 'approach',
+      xLabel: 'Case ID',
+      yLabel: 'Basic Operations'
+    });
+  }
+  else if (graphType === 'task1c') {
+    renderLineChart({
+      title: 'Task 1c: Hash Table Space k vs Basic Operations',
+      xType: 'number',
+      xColumn: 'k',
+      yColumn: 'basic_ops',
+      groupColumn: 'hash_function',
+      xLabel: 'Space k',
+      yLabel: 'Basic Operations'
+    });
+  }
+  else if (graphType === 'task2') {
+    renderLineChart({
+      title: 'Task 2: Greedy Approaches Basic Operations by Case',
+      xType: 'category',
+      xColumn: 'case_id',
+      yColumn: 'basic_ops',
+      groupColumn: 'approach',
+      xLabel: 'Case ID',
+      yLabel: 'Basic Operations'
+    });
+  }
+  else if (graphType === 'task1vstask2') {
+    renderLineChart({
+      title: 'Task 1 vs Task 2: Basic Operations by Case',
+      xType: 'category',
+      xColumn: 'case_id',
+      yColumn: 'basic_ops',
+      groupColumn: 'approach',
+      xLabel: 'Case ID',
+      yLabel: 'Basic Operations'
+    });
+  }
+}
+
+function renderLineChart(config) {
+  chartDiv.innerHTML = '';
+  legendDiv.innerHTML = '';
+
+  if (!rows.length) {
+    chartDiv.innerHTML = '<p>No data loaded.</p>';
+    return;
+  }
+
+  const usableRows = rows.filter(row => {
+    return row[config.xColumn] !== undefined &&
+           row[config.groupColumn] !== undefined &&
+           typeof row[config.yColumn] === 'number';
+  });
+
+  if (!usableRows.length) {
+    chartDiv.innerHTML = '<p>No usable rows found. Check your CSV column names.</p>';
+    return;
+  }
+
+  const width = 1000;
+  const height = 520;
+  const margin = { top: 55, right: 40, bottom: 70, left: 100 };
+  const plotWidth = width - margin.left - margin.right;
+  const plotHeight = height - margin.top - margin.bottom;
+
+  const svg = createSVG(width, height);
+  chartDiv.appendChild(svg);
+
+  const useLogScale = logScaleCheckbox.checked;
+
+  const title = useLogScale
+    ? config.title + ' (Log Scale)'
+    : config.title;
+
+  addText(svg, title, width / 2, 24, 'middle', 16, 'bold');
+
+  const yMax = Math.max(...usableRows.map(row => row[config.yColumn]));
+
+  const yScale = value => {
+    if (useLogScale) {
+      const safeValue = Math.max(value, 1);
+      const logMax = Math.log10(Math.max(yMax, 1));
+      return margin.top + plotHeight - (Math.log10(safeValue) / logMax) * plotHeight;
+    }
+
+    return margin.top + plotHeight - (value / yMax) * plotHeight;
+  };
+
+  let xScale;
+  let xTicks;
+
+  if (config.xType === 'category') {
+    xTicks = unique(usableRows.map(row => row[config.xColumn]));
+    xScale = value => {
+      if (xTicks.length === 1) return margin.left + plotWidth / 2;
+      const index = xTicks.indexOf(value);
+      return margin.left + (index / (xTicks.length - 1)) * plotWidth;
+    };
+  }
+  else {
+    const xValues = usableRows.map(row => row[config.xColumn]);
+    const xMin = Math.min(...xValues);
+    const xMax = Math.max(...xValues);
+    xTicks = niceNumberTicks(xMin, xMax, 6);
+    xScale = value => {
+      if (xMax === xMin) return margin.left + plotWidth / 2;
+      return margin.left + ((value - xMin) / (xMax - xMin)) * plotWidth;
+    };
+  }
+
+  let yTicks;
+
+  if (useLogScale) {
+    yTicks = makeLogTicks(yMax);
+  }
+  else {
+    yTicks = niceNumberTicks(0, yMax, 8);
+  }
+
+  drawGridAndAxes(svg, {
+    width,
+    height,
+    margin,
+    plotWidth,
+    plotHeight,
+    xTicks,
+    yTicks,
+    xScale,
+    yScale,
+    xLabel: config.xLabel,
+    yLabel: useLogScale ? config.yLabel + ' (log scale)' : config.yLabel
+  });
+
+  const groups = groupBy(usableRows, config.groupColumn);
+  const colorMap = buildColorMap(Object.keys(groups));
+
+  Object.keys(groups).forEach(groupName => {
+    const groupRows = groups[groupName];
+
+    groupRows.sort((a, b) => {
+      if (config.xType === 'category') {
+        return xTicks.indexOf(a[config.xColumn]) - xTicks.indexOf(b[config.xColumn]);
+      }
+      return a[config.xColumn] - b[config.xColumn];
+    });
+
+    const points = groupRows.map(row => {
+      return {
+        x: xScale(row[config.xColumn]),
+        y: yScale(row[config.yColumn]),
+        row
+      };
+    });
+
+    drawPolyline(svg, points, colorMap[groupName]);
+
+    points.forEach(point => {
+      drawPoint(svg, point.x, point.y, colorMap[groupName], makeTooltipHTML(point.row, config, groupName));
+    });
+  });
+
+  drawLegend(colorMap);
+}
+
+function makeLogTicks(yMax) {
+  const ticks = [];
+  let value = 1;
+
+  while (value <= yMax) {
+    ticks.push(value);
+    value *= 10;
+  }
+
+  if (!ticks.includes(yMax)) {
+    ticks.push(yMax);
+  }
+
+  return ticks;
+}
+
+function drawGridAndAxes(svg, chart) {
+  const left = chart.margin.left;
+  const right = chart.margin.left + chart.plotWidth;
+  const top = chart.margin.top;
+  const bottom = chart.margin.top + chart.plotHeight;
+
+  chart.yTicks.forEach(tick => {
+    const y = chart.yScale(tick);
+    addLine(svg, left, y, right, y, '#e5e7eb', 1);
+    addText(svg, formatTick(tick), left - 10, y + 4, 'end', 12, 'normal', '#374151');
+  });
+
+  chart.xTicks.forEach(tick => {
+    const x = chart.xScale(tick);
+    addLine(svg, x, top, x, bottom, '#e5e7eb', 1);
+    addText(svg, String(tick), x, bottom + 24, 'middle', 12, 'normal', '#374151');
+  });
+
+  addLine(svg, left, bottom, right, bottom, '#94a3b8', 1.5);
+  addLine(svg, left, top, left, bottom, '#94a3b8', 1.5);
+
+  addText(svg, chart.xLabel, (left + right) / 2, chart.height - 20, 'middle', 13, 'normal');
+
+  const yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  yLabel.setAttribute('x', -chart.height / 2);
+  yLabel.setAttribute('y', 25);
+  yLabel.setAttribute('text-anchor', 'middle');
+  yLabel.setAttribute('font-size', '13');
+  yLabel.setAttribute('transform', 'rotate(-90)');
+  yLabel.textContent = chart.yLabel;
+  svg.appendChild(yLabel);
+}
+
+function makeTooltipHTML(row, config, groupName) {
+  let html = `<div class="hdr">${groupName}</div>`;
+  html += `<div class="sub">${config.xColumn} = ${row[config.xColumn]}</div>`;
+  html += `<div>${config.yColumn} = ${row[config.yColumn]}</div>`;
+
+  if (row.optimal_value !== undefined) html += `<div>optimal_value = ${row.optimal_value}</div>`;
+  if (row.greedy_value !== undefined) html += `<div>greedy_value = ${row.greedy_value}</div>`;
+  if (row.value !== undefined) html += `<div>value = ${row.value}</div>`;
+  if (row.collisions !== undefined) html += `<div>collisions = ${row.collisions}</div>`;
+  if (row.filled_cells !== undefined) html += `<div>filled_cells = ${row.filled_cells}</div>`;
+  if (row.nW !== undefined) html += `<div>nW = ${row.nW}</div>`;
+
+  return html;
+}
+
+function drawPolyline(svg, points, color) {
+  const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  polyline.setAttribute('points', points.map(p => `${p.x},${p.y}`).join(' '));
+  polyline.setAttribute('fill', 'none');
+  polyline.setAttribute('stroke', color);
+  polyline.setAttribute('stroke-width', '2.5');
+  svg.appendChild(polyline);
+}
+
+function drawPoint(svg, x, y, color, html) {
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('cx', x);
+  circle.setAttribute('cy', y);
+  circle.setAttribute('r', 4);
+  circle.setAttribute('fill', color);
+
+  circle.addEventListener('mouseenter', event => {
+    tooltip.innerHTML = html;
+    tooltip.style.display = 'block';
+    tooltip.style.borderLeft = `4px solid ${color}`;
+    circle.setAttribute('r', 6);
+  });
+
+  circle.addEventListener('mousemove', event => {
+    tooltip.style.left = `${event.clientX + 12}px`;
+    tooltip.style.top = `${event.clientY + 12}px`;
+  });
+
+  circle.addEventListener('mouseleave', () => {
+    tooltip.style.display = 'none';
+    circle.setAttribute('r', 4);
+  });
+
+  svg.appendChild(circle);
+}
+
+function createSVG(width, height) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  return svg;
+}
+
+function addLine(svg, x1, y1, x2, y2, stroke, strokeWidth) {
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', x1);
+  line.setAttribute('y1', y1);
+  line.setAttribute('x2', x2);
+  line.setAttribute('y2', y2);
+  line.setAttribute('stroke', stroke);
+  line.setAttribute('stroke-width', strokeWidth);
+  svg.appendChild(line);
+}
+
+function addText(svg, text, x, y, anchor, size, weight = 'normal', color = '#111827') {
+  const item = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  item.setAttribute('x', x);
+  item.setAttribute('y', y);
+  item.setAttribute('text-anchor', anchor);
+  item.setAttribute('font-size', size);
+  item.setAttribute('font-weight', weight);
+  item.setAttribute('fill', color);
+  item.textContent = text;
+  svg.appendChild(item);
+}
+
+function drawLegend(colorMap) {
+  legendDiv.innerHTML = '';
+
+  Object.keys(colorMap).forEach(label => {
+    const badge = document.createElement('div');
+    badge.className = 'badge';
+
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    dot.style.background = colorMap[label];
+
+    const name = document.createElement('span');
+    name.textContent = label;
+
+    badge.appendChild(dot);
+    badge.appendChild(name);
+    legendDiv.appendChild(badge);
+  });
+}
+
+function groupBy(data, column) {
+  const groups = {};
+
+  data.forEach(row => {
+    const key = row[column];
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(row);
+  });
+
+  return groups;
+}
+
+function buildColorMap(labels) {
+  const map = {};
+  let fallbackIndex = 0;
+
+  labels.forEach(label => {
+    if (colors[label]) {
+      map[label] = colors[label];
+    }
+    else {
+      map[label] = fallbackColors[fallbackIndex % fallbackColors.length];
+      fallbackIndex++;
+    }
+  });
+
+  return map;
+}
+
+function unique(values) {
+  return [...new Set(values)];
+}
+
+function niceNumberTicks(min, max, count) {
+  if (max === min) return [min];
+
+  const ticks = [];
+  const step = (max - min) / count;
+
+  for (let i = 0; i <= count; ++i) {
+    ticks.push(min + step * i);
+  }
+
+  return ticks;
+}
+
+function formatTick(value) {
+  if (Math.abs(value) >= 1000) {
+    return Math.round(value).toLocaleString();
+  }
+
+  if (Number.isInteger(value)) {
+    return String(value);
+  }
+
+  return value.toFixed(1);
+}
+
+chartDiv.innerHTML = '<p>Upload a CSV file to generate a graph.</p>';
+</script>
+</body>
+</html>
