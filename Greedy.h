@@ -28,5 +28,15 @@ class Greedy{
         void printGreedyResults();
         void printHeapResults();
 
+        auto getOptimalValue() const {
+            return optimalValue;
+        }
+        auto getBasicOps() const {
+            return basicOps;
+        }
+        auto getOptimalSet() const {
+            return optimalSet;
+        }
+
 };
 #endif

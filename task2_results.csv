@@ -1,0 +1,17 @@
+case_id,approach,basic_ops,optimal_value
+p01,greedy_sort,83,266
+p01,greedy_heap,44,266
+p02,greedy_sort,32,47
+p02,greedy_heap,17,47
+p03,greedy_sort,41,100
+p03,greedy_heap,22,100
+p04,greedy_sort,50,90
+p04,greedy_heap,25,90
+p05,greedy_sort,59,750
+p05,greedy_heap,29,750
+p06,greedy_sort,51,1478
+p06,greedy_heap,28,1478
+p07,greedy_sort,141,1302
+p07,greedy_heap,81,1302
+p08,greedy_sort,262,13346220
+p08,greedy_heap,162,13346220

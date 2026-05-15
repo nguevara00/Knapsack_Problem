@@ -40,15 +40,78 @@ Task Tracking -
 
 const int ALPHA = 4; // tuning parameter for space vs time tradeoff in 1c hash table approach
 
-int main(int argc, char* argv[]) {
-	
-    //input handling
-    if (argc != 2) {
-	    std::cerr << "Incorrect input. Correct format: ./<exectuable.out> <filenumber>" << std::endl;
-	    return 1;
-	}
-    
-	std::string dataset = argv[1];
+void allToCSV(std::string dataset, DynamicKnapsack tradKnapsack, DynamicKnapsack memKnapsack, SpaceEfficient hashKnapsack, Greedy greedyKnapsack, Greedy heapKnapsack){
+    std::string caseId = "p";
+
+    if (dataset == "10") {
+        caseId += "10";
+    }
+    else {
+        caseId += "0" + dataset;
+    }
+
+    writeHeaderIfEmpty(
+        "task1ab_results.csv",
+        "case_id,approach,basic_ops,optimal_value"
+    );
+
+    appendCSVRow(
+        "task1ab_results.csv",
+        caseId + ",traditional_dp," +
+        std::to_string(tradKnapsack.getBasicOps()) + "," +
+        std::to_string(tradKnapsack.getOptimalValue())
+    );
+
+    appendCSVRow(
+        "task1ab_results.csv",
+        caseId + ",memory_function," +
+        std::to_string(memKnapsack.getBasicOps()) + "," +
+        std::to_string(memKnapsack.getOptimalValue())
+    );
+
+    writeHeaderIfEmpty(
+    "task2_results.csv",
+    "case_id,approach,basic_ops,optimal_value"
+    );
+
+    appendCSVRow(
+        "task2_results.csv",
+        caseId + ",greedy_sort," +
+        std::to_string(greedyKnapsack.getBasicOps()) + "," +
+        std::to_string(greedyKnapsack.getOptimalValue())
+    );
+
+    appendCSVRow(
+        "task2_results.csv",
+        caseId + ",greedy_heap," +
+        std::to_string(heapKnapsack.getBasicOps()) + "," +
+        std::to_string(heapKnapsack.getOptimalValue())
+    );
+
+    writeHeaderIfEmpty(
+    "task1_vs_task2_results.csv",
+    "case_id,approach,basic_ops,optimal_value"
+    );
+
+    appendCSVRow(
+        "task1_vs_task2_results.csv",
+        caseId + ",memory_function," +
+        std::to_string(memKnapsack.getBasicOps()) + "," +
+        std::to_string(memKnapsack.getOptimalValue())
+    );
+
+    appendCSVRow(
+        "task1_vs_task2_results.csv",
+        caseId + ",greedy_heap," +
+        std::to_string(heapKnapsack.getBasicOps()) + "," +
+        std::to_string(heapKnapsack.getOptimalValue())
+    );
+
+}
+
+
+int excecuteAll(std::string dataset, bool writeToCSV)
+{
     std::string capacityFile;
     std::string valuesFile;
     std::string weightsFile ;
@@ -115,8 +178,29 @@ int main(int argc, char* argv[]) {
     // heap based greedy approach
     Greedy heapKnapsack(values, weights, n, W);
     heapKnapsack.solveHeap();
-    heapKnapsack.printHeapResults();    
+    heapKnapsack.printHeapResults();  
+    if(writeToCSV){
+        allToCSV(dataset, tradKnapsack, memKnapsack, hashKnapsack, greedyKnapsack, heapKnapsack);
+    }
+    return 0;
+}
 
+int main(int argc, char* argv[]) {
+	
+    //input handling
+    if (argc != 2) {
+	    std::cerr << "Incorrect input. Correct format: ./<exectuable.out> <filenumber>" << std::endl;
+	    return 1;
+	}
+    
+	std::string dataset = argv[1];
+    excecuteAll(dataset, false);
+
+    for(int i = 1; i <= 10; i++){
+        std::string dataset = std::to_string(i);
+        excecuteAll(dataset, true);
+    }
+    
     return 0;
 }
 

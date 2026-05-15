@@ -34,7 +34,15 @@ public:
     void solveMemoryFunction();
     void printMemoryResult();
 
-    
+    auto getOptimalValue() const {
+        return optimalValue;
+    }
+    auto getBasicOps() const {
+        return basicOps;
+    }
+    auto getOptimalSet() const {
+        return optimalSet;
+    }
 };
 
 #endif

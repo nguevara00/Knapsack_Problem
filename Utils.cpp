@@ -5,8 +5,9 @@
 
 //includes file handling and merge sort
 
-bool fileToVector(const std::string& filename, std::vector<int>& values){
+bool fileToVector(const std::string& filename, std::vector<int>& values) {
     std::ifstream inputFile(filename);
+
     if (!inputFile) {
         std::cerr << "Error opening file: " << filename << std::endl;
         return false;
@@ -14,12 +15,28 @@ bool fileToVector(const std::string& filename, std::vector<int>& values){
 
     int value;
 
-    while (inputFile >> value){
+    while (inputFile >> value) {
         values.push_back(value);
     }
 
-    inputFile.close();
     return true;
+}
+
+void writeHeaderIfEmpty(const std::string& filename, const std::string& header) {
+    std::ifstream checkFile(filename);
+
+    bool isEmpty = !checkFile.good() || checkFile.peek() == std::ifstream::traits_type::eof();
+    checkFile.close();
+
+    if (isEmpty) {
+        std::ofstream outFile(filename, std::ios::app);
+        outFile << header << '\n';
+    }
+}
+
+void appendCSVRow(const std::string& filename, const std::string& row) {
+    std::ofstream outFile(filename, std::ios::app);
+    outFile << row << '\n';
 }
 
 void merge(std::vector<std::pair<double, int>>& arr, int left, int mid, int right, int& opCount) {

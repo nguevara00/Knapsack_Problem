@@ -33,6 +33,16 @@ class SpaceEfficient{
         void solveSpaceEfficient();
         void printSpaceResult();
 
+        
+        auto getOptimalValue() const {
+            return optimalValue;
+        }
+        auto getBasicOps() const {
+            return basicOps;
+        }
+        auto getOptimalSet() const {
+            return optimalSet;
+        }
     
 };
 
