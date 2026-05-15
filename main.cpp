@@ -33,6 +33,7 @@ Task Tracking -
 #include "HashTable.h"
 #include "Heap.h"
 #include "DynamicKnapsack.h"
+#include "Utils.h"
 
 using matrix = std::vector<std::vector<int>>;
 const int ALPHA = 4; // ask me about this 
@@ -42,24 +43,6 @@ struct Result {
     std::stack<int> optimalSet;
     int optimalValue;
 };
-
-//reads in the file and stores the contents in the vector
-bool fileToVector(const std::string& filename, std::vector<int>& values){
-    std::ifstream inputFile(filename);
-    if (!inputFile) {
-        std::cerr << "Error opening file: " << filename << std::endl;
-        return false;
-    }
-
-    int value;
-
-    while (inputFile >> value){
-        values.push_back(value);
-    }
-
-    inputFile.close();
-    return true;
-}
 
 //recursive helper for space-efficient approach, builds the set of items that were chosen in the optimal solution of the knapsack problem
 std::stack<int> optimalSetBuilderHash(std::stack<int>& set, int i, int j, const std::vector<int>& v, const std::vector<int>& w, HashTable& hashTable, int& opCount){
@@ -124,68 +107,6 @@ Result spaceEfficient(const std::vector<int>& v, const std::vector<int>& w, int 
     result.basicOps = opCount;
 
     return result;
-}
-
-void merge(std::vector<std::pair<double, int>>& arr, int left, int mid, int right, int& opCount) {
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
-    // create temp arrays
-    std::vector<std::pair<double, int>> L(n1);
-    std::vector<std::pair<double, int>> R(n2);
-
-    // copy & merge data to temp arrays
-    for (int i = 0; i < n1; i++) {
-        L[i] = arr[left + i];
-        opCount++;
-    }
-
-    for (int j = 0; j < n2; j++) {
-        R[j] = arr[mid + 1 + j];
-        opCount++;
-    }
-
-    int i = 0;
-    int j = 0;
-    int k = left;
-
-    while (i < n1 && j < n2) {
-        opCount++;
-
-        if (L[i] >= R[j]) {   // sort in descending order based on ratio
-            arr[k] = L[i];
-            i++;
-        }
-        else {
-            arr[k] = R[j];
-            j++;
-        }
-
-        k++;
-    }
-
-    while (i < n1) {
-        opCount++;
-        arr[k] = L[i];
-        i++;
-        k++;
-    } // copy the remaining elements of R, if there are any
-
-    while (j < n2) {
-        opCount++;
-        arr[k] = R[j];
-        j++;
-        k++;
-    }
-}
-
-void mergeSort(std::vector<std::pair<double, int>>& arr, int left, int right, int& opCount) {
-    if (left < right) {
-        int mid = left + (right - left) / 2;
-
-        mergeSort(arr, left, mid, opCount); // sort first half
-        mergeSort(arr, mid + 1, right, opCount); // sort second half
-        merge(arr, left, mid, right, opCount); // merge the sorted halves
-    }
 }
 
 Result greedyFunction(const std::vector<int>& v, const std::vector<int>& w, int capacity) {
@@ -327,11 +248,13 @@ int main(int argc, char* argv[]) {
     std::cout << "File containing the capacity, weights, and values are: " << capacityFile << ", " << weightsFile << ", " << valuesFile << std::endl << std::endl;
     std::cout << "Knapsack capacity = " << W << ". Total number of items = " << n << std::endl << std::endl;
 
+    // traditional dynamic programming
     DynamicKnapsack tradKnapsack(values, weights, n, W);
     tradKnapsack.solveTraditional();
     tradKnapsack.printTradResult();
 
-    DynamicKnapsack memKnapsack(values,weights,n,W);
+    // memory function dynamic programming
+    DynamicKnapsack memKnapsack(values, weights, n, W);
     memKnapsack.solveMemoryFunction();
     memKnapsack.printMemoryResult();
 
