@@ -38,7 +38,7 @@ Task Tracking -
 #include "SpaceEfficient.h"
 #include "Greedy.h"
 
-const int ALPHA = 4; // tuning parameter for space vs time tradeoff in 1c hash table approach
+const int ALPHA = 8; // tuning parameter for space vs time tradeoff in 1c hash table approach
 
 void allToCSV(std::string dataset, DynamicKnapsack tradKnapsack, DynamicKnapsack memKnapsack, SpaceEfficient hashKnapsack, Greedy greedyKnapsack, Greedy heapKnapsack){
     std::string caseId = "p";

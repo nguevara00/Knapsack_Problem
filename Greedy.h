@@ -22,6 +22,8 @@ class Greedy{
             this->W = W;
             this->v = v;
             this->w = w;
+            basicOps = 0;
+            optimalValue = 0;
         }
         void solveGreedy();
         void solveHeap();

@@ -26,6 +26,8 @@ public:
         this->W = W;
         this->v = v;
         this->w = w;
+        this->basicOps = 0;
+        this->optimalValue = 0;
     }
 
     void solveTraditional();

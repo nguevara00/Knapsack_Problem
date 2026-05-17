@@ -28,6 +28,8 @@ class SpaceEfficient{
             this->v = v;
             this->w = w;
             this->k = k;
+            basicOps = 0;
+            optimalValue = 0;
         }
 
         void solveSpaceEfficient();

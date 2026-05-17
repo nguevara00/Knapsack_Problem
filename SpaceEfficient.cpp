@@ -4,8 +4,6 @@
 #include <iostream>
 
 void SpaceEfficient::optimalSetBuilderHash(int i, int j, HashTable& hashTable){
-    //the basic operation is comparison, each call compares one pair of cells
-    basicOps++;
     if (i == 0 || j == 0){
         return;
     }
@@ -37,6 +35,7 @@ int SpaceEfficient::spaceEfficientHelper(int i, int j, HashTable& hashTable){
     if (stored != -1){
         return stored;
     }
+
     int solution;
 
     if (j < w[i-1]) {
@@ -45,13 +44,12 @@ int SpaceEfficient::spaceEfficientHelper(int i, int j, HashTable& hashTable){
         solution = std::max(spaceEfficientHelper(i-1, j, hashTable), v[i-1] + spaceEfficientHelper(i-1,j-w[i-1], hashTable));
     }
 
-    hashTable.insert(i,j,solution,basicOps);
-    basicOps++;
+    hashTable.insert(i,j,solution);
     return solution;
 }
 
 void SpaceEfficient::solveSpaceEfficient(){
-    HashTable hashTable(k, W);
+    HashTable hashTable(k, W, n);
     optimalValue = spaceEfficientHelper(n,W,hashTable);
     optimalSetBuilderHash(n, W, hashTable);
 }
