@@ -49,10 +49,9 @@ void allToCSV(std::string dataset, DynamicKnapsack tradKnapsack, DynamicKnapsack
     else {
         caseId += "0" + dataset;
     }
-
     writeHeaderIfEmpty(
         "task1ab_results.csv",
-        "case_id,approach,basic_ops,optimal_value"
+        "1A vs 1B: Basic Ops by Case\ncase_id,approach,basic_ops,optimal_value"
     );
 
     appendCSVRow(
@@ -71,7 +70,7 @@ void allToCSV(std::string dataset, DynamicKnapsack tradKnapsack, DynamicKnapsack
 
     writeHeaderIfEmpty(
     "task2_results.csv",
-    "case_id,approach,basic_ops,optimal_value"
+    "Task 2: Greedy Approaches\ncase_id,approach,basic_ops,optimal_value"
     );
 
     appendCSVRow(
@@ -90,7 +89,7 @@ void allToCSV(std::string dataset, DynamicKnapsack tradKnapsack, DynamicKnapsack
 
     writeHeaderIfEmpty(
     "task1_vs_task2_results.csv",
-    "case_id,approach,basic_ops,optimal_value"
+    "1 vs 2: Basic Ops by Case\ncase_id,approach,basic_ops,optimal_value"
     );
 
     appendCSVRow(
@@ -110,20 +109,20 @@ void allToCSV(std::string dataset, DynamicKnapsack tradKnapsack, DynamicKnapsack
 }
 
 
-int excecuteAll(std::string dataset, bool writeToCSV)
+int excecuteAll(std::string dataset, std::string fileName, bool writeToCSV, bool printResults = false)
 {
     std::string capacityFile;
     std::string valuesFile;
     std::string weightsFile ;
 
-    if (dataset != "10") {
-        capacityFile = "./KnapsackTestData/p0" + dataset + "_c.txt";
-        valuesFile = "./KnapsackTestData/p0" + dataset + "_v.txt";
-        weightsFile = "./KnapsackTestData/p0" + dataset + "_w.txt";
+    if (stoi(dataset) < 10) {
+        capacityFile = "./" + fileName + "/p0" + dataset + "_c.txt";
+        valuesFile = "./" + fileName + "/p0" + dataset + "_v.txt";
+        weightsFile = "./" + fileName + "/p0" + dataset + "_w.txt";
     } else {
-        capacityFile = "./KnapsackTestData/p" + dataset + "_c.txt";
-        valuesFile = "./KnapsackTestData/p" + dataset + "_v.txt";
-        weightsFile = "./KnapsackTestData/p" + dataset + "_w.txt";
+        capacityFile = "./" + fileName + "/p" + dataset + "_c.txt";
+        valuesFile = "./" + fileName + "/p" + dataset + "_v.txt";
+        weightsFile = "./" + fileName + "/p" + dataset + "_w.txt";
     }
 
     std::vector<int> capacity;    
@@ -158,27 +157,42 @@ int excecuteAll(std::string dataset, bool writeToCSV)
     // traditional dynamic programming
     DynamicKnapsack tradKnapsack(values, weights, n, W);
     tradKnapsack.solveTraditional();
-    tradKnapsack.printTradResult();
+    if (printResults)
+    {
+        tradKnapsack.printTradResult();
+    }
 
     // memory function dynamic programming
     DynamicKnapsack memKnapsack(values, weights, n, W);
     memKnapsack.solveMemoryFunction();
-    memKnapsack.printMemoryResult();
+    if (printResults)
+    {
+        memKnapsack.printMemoryResult();
+    }
 
     // space efficient dynamic programming
     SpaceEfficient hashKnapsack(values, weights, n, W, k);
     hashKnapsack.solveSpaceEfficient();
-    hashKnapsack.printSpaceResult();
-
+    if (printResults)
+    {  
+        hashKnapsack.printSpaceResult();
+    }
     // greedy approach
     Greedy greedyKnapsack(values, weights, n, W);
     greedyKnapsack.solveGreedy();
-    greedyKnapsack.printGreedyResults();
+    if (printResults)
+    {
+        greedyKnapsack.printGreedyResults();
+    }
 
     // heap based greedy approach
     Greedy heapKnapsack(values, weights, n, W);
     heapKnapsack.solveHeap();
-    heapKnapsack.printHeapResults();  
+    if (printResults)
+    {
+        heapKnapsack.printHeapResults();
+    }
+
     if(writeToCSV){
         allToCSV(dataset, tradKnapsack, memKnapsack, hashKnapsack, greedyKnapsack, heapKnapsack);
     }
@@ -186,21 +200,25 @@ int excecuteAll(std::string dataset, bool writeToCSV)
 }
 
 int main(int argc, char* argv[]) {
-	
+	emptyFile("task1ab_results.csv");
+    emptyFile("task2_results.csv");
+    emptyFile("task1_vs_task2_results.csv");
+
     //input handling
-    if (argc != 2) {
-	    std::cerr << "Incorrect input. Correct format: ./<exectuable.out> <filenumber>" << std::endl;
+    if (argc != 3) {
+	    std::cerr << "Incorrect input. Correct format: ./<exectuable.out> <filenumber> <filename>" << std::endl;
 	    return 1;
 	}
     
 	std::string dataset = argv[1];
-    excecuteAll(dataset, false);
-
-    for(int i = 1; i <= 10; i++){
+    std::string fileName = argv[2];
+    excecuteAll(dataset, fileName, false, true);
+    bool filesValid = true;
+    for(int i = 1; filesValid; i++){
         std::string dataset = std::to_string(i);
-        excecuteAll(dataset, true);
+        filesValid = !excecuteAll(dataset, fileName, true);
+        std::cout << "filesValid: " << filesValid << std::endl;
     }
-    
     return 0;
 }
 

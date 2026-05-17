@@ -22,6 +22,11 @@ bool fileToVector(const std::string& filename, std::vector<int>& values) {
     return true;
 }
 
+void emptyFile(const std::string& filename) {
+    std::ofstream outFile(filename, std::ios::trunc);
+    outFile.close();
+}
+
 void writeHeaderIfEmpty(const std::string& filename, const std::string& header) {
     std::ifstream checkFile(filename);
 

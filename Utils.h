@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+void emptyFile(const std::string& filename);
+
 bool fileToVector(const std::string& filename, std::vector<int>& values);
 
 void writeHeaderIfEmpty(const std::string& filename, const std::string& header);
