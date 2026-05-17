@@ -110,20 +110,20 @@ void allToCSV(std::string dataset, DynamicKnapsack tradKnapsack, DynamicKnapsack
 }
 
 
-int excecuteAll(std::string dataset, std::string fileName, bool writeToCSV, bool printResults = false)
+int excecuteAll(std::string dataset, bool writeToCSV, bool printResults = false)
 {
     std::string capacityFile;
     std::string valuesFile;
     std::string weightsFile ;
 
     if (stoi(dataset) < 10) {
-        capacityFile = "./" + fileName + "/p0" + dataset + "_c.txt";
-        valuesFile = "./" + fileName + "/p0" + dataset + "_v.txt";
-        weightsFile = "./" + fileName + "/p0" + dataset + "_w.txt";
+        capacityFile = "./KnapsackTestData/p0" + dataset + "_c.txt";
+        valuesFile = "./KnapsackTestData/p0" + dataset + "_v.txt";
+        weightsFile = "./KnapsackTestData/p0" + dataset + "_w.txt";
     } else {
-        capacityFile = "./" + fileName + "/p" + dataset + "_c.txt";
-        valuesFile = "./" + fileName + "/p" + dataset + "_v.txt";
-        weightsFile = "./" + fileName + "/p" + dataset + "_w.txt";
+        capacityFile = "./KnapsackTestData/p" + dataset + "_c.txt";
+        valuesFile = "./KnapsackTestData/p" + dataset + "_v.txt";
+        weightsFile = "./KnapsackTestData/p" + dataset + "_w.txt";
     }
 
     std::vector<int> capacity;    
@@ -149,10 +149,11 @@ int excecuteAll(std::string dataset, std::string fileName, bool writeToCSV, bool
     int n = static_cast<int>(values.size());
     int k = ((n * W) / ALPHA);
 
-    //print input stats
-    std::cout << "File containing the capacity, weights, and values are: " << capacityFile << ", " << weightsFile << ", " << valuesFile << std::endl << std::endl;
-    std::cout << "Knapsack capacity = " << W << ". Total number of items = " << n << std::endl << std::endl;
-
+    if(printResults){
+        //print input stats
+        std::cout << "File containing the capacity, weights, and values are: " << capacityFile << ", " << weightsFile << ", " << valuesFile << std::endl << std::endl;
+        std::cout << "Knapsack capacity = " << W << ". Total number of items = " << n << std::endl << std::endl;
+    }
     //solve the knapsack
 
     // traditional dynamic programming
@@ -206,21 +207,18 @@ int main(int argc, char* argv[]) {
     emptyFile("task1_vs_task2_results.csv");
 
     //input handling
-    if (argc != 3) {
-	    std::cerr << "Incorrect input. Correct format: ./<exectuable.out> <filenumber> <filename>" << std::endl;
+    if (argc != 2) {
+	    std::cerr << "Incorrect input. Correct format: ./<exectuable.out> <filenumber>" << std::endl;
 	    return 1;
 	}
     
 	std::string dataset = argv[1];
-    std::string fileName = argv[2]; 
     // execute all algorithms for the given dataset, print results, but dont write to csv
-    excecuteAll(dataset, fileName, false, true);
-    bool filesValid = true;
-    for(int i = 1; filesValid; i++){
+    excecuteAll(dataset, false, true);
+    for(int i = 1; i <= 8; i++){  // Assuming there are 10 datasets
         std::string dataset = std::to_string(i);
         // execute all algorithms for the given dataset (i), dont print the results but write to csv
-        filesValid = !excecuteAll(dataset, fileName, true);
-        std::cout << "filesValid: " << filesValid << std::endl;
+        excecuteAll(dataset, true);
     }
     return 0;
 }
