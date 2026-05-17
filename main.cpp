@@ -49,6 +49,7 @@ void allToCSV(std::string dataset, DynamicKnapsack tradKnapsack, DynamicKnapsack
     else {
         caseId += "0" + dataset;
     }
+
     writeHeaderIfEmpty(
         "task1ab_results.csv",
         "1A vs 1B: Basic Ops by Case\ncase_id,approach,basic_ops,optimal_value"
@@ -211,11 +212,13 @@ int main(int argc, char* argv[]) {
 	}
     
 	std::string dataset = argv[1];
-    std::string fileName = argv[2];
+    std::string fileName = argv[2]; 
+    // execute all algorithms for the given dataset, print results, but dont write to csv
     excecuteAll(dataset, fileName, false, true);
     bool filesValid = true;
     for(int i = 1; filesValid; i++){
         std::string dataset = std::to_string(i);
+        // execute all algorithms for the given dataset (i), dont print the results but write to csv
         filesValid = !excecuteAll(dataset, fileName, true);
         std::cout << "filesValid: " << filesValid << std::endl;
     }
