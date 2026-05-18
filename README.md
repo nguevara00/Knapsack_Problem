@@ -19,7 +19,7 @@ The test files p01 - p10 must be in the directory /KnapsackTestData
 
 ```bash
 make
-./knapsack <filename>
+./knapsack <test data prefix>
 
 (for example, ./knapsack 10)
 
