@@ -3,27 +3,6 @@
 // Project 4 - Knapsack
 // 5-9-2026
 
-/*
-Task Tracking -
-
-	PROGRAMMING -
-		all tasks working
-        all functions refactored into classes
-			
-	REPORT -
-		Graph 1A vs 1B - 0/1
-		Analysis 1A vs 1B - 0/1
-	
-		Graph 1C - 0/1
-		Analysis 1C - 0/1
-
-		Analysis 1B vs 1C - 0/1
-		Graph 2A vs 2B - 0/1
-		Analysis 2A vs 2B - 0/1
-
-		Analysis 1 vs 2 - 0/1			
-*/
-
 #include <fstream>
 #include <algorithm> //std::max & std::sort for 2A & B output formatting
 #include <vector>
